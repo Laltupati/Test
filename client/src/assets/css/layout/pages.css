@@ -1,0 +1,154 @@
+/* ═══════════════════════════════════════════════════════════════════
+   PAGE VISIBILITY & LAYOUT
+   Page container, visibility states, and page-specific structures
+   ═══════════════════════════════════════════════════════════════════ */
+
+main {
+  position: relative;
+  z-index: 1;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 40px 40px 80px;
+}
+
+/* When main contains the category/home page, let it go full-bleed
+   so the footer can push to the viewport bottom */
+main:has(.category-page) {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 64px);
+}
+
+/* Let AI Agents page go full-bleed too */
+main:has(.journey-page) {
+  padding: 0 !important;
+}
+
+/* Reduce top/side padding for Use Cases page to tighten the layout */
+main:has(#page-usecases) {
+  padding: 16px 20px 40px;
+}
+
+/* ── PAGE VISIBILITY ── */
+
+.page {
+  display: none;
+}
+
+.page.active {
+  display: block;
+}
+
+/* ── FLEX LAYOUTS ── */
+
+.discovery-wrap {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 28px;
+  align-items: flex-start;
+}
+
+.discovery-right {
+  flex: 1;
+  min-width: 0;
+}
+
+.search-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+/* ── PANELS & CONTAINERS ── */
+
+.panel {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+}
+
+/* ── SECTION TITLE ── */
+
+.sec-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: none;
+  letter-spacing: 0.1em;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sec-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ── AI AGENTS PLACEHOLDER ── */
+
+.ai-agents-page {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 20px 0 40px;
+}
+
+.ai-agents-hero {
+  background: linear-gradient(180deg, #EEF4FF 0%, #FFFFFF 100%);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 32px;
+}
+
+.ai-agents-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: none;
+  color: var(--kpmg-blue-light);
+  margin-bottom: 10px;
+}
+
+.ai-agents-title {
+  font-size: 30px;
+  color: var(--text-primary);
+  margin: 0 0 8px;
+}
+
+.ai-agents-sub {
+  margin: 0;
+  color: var(--text-secondary);
+  max-width: 620px;
+  line-height: 1.6;
+}
+
+
+/* ── RESPONSIVE ── */
+
+@media (max-width: 1100px) {
+  main {
+    padding: 32px 32px 60px;
+  }
+}
+
+@media (max-width: 800px) {
+  main {
+    padding: 28px 20px 60px;
+  }
+
+  .discovery-wrap {
+    flex-direction: column;
+  }
+
+  .filter-panel {
+    width: 100%;
+  }
+}

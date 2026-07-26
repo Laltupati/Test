@@ -1,0 +1,129 @@
+/* ═══════════════════════════════════════════════════════════════════
+   BADGES & PILLS
+   Status badges, labels, inline badges for various use cases
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── STATUS BADGES (Tables, Monitoring) ── */
+
+.tbadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 9px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.tb-run {
+  background: rgba(38, 153, 36, 0.15);
+  color: var(--green-s);
+  border: 1px solid rgba(38, 153, 36, 0.3);
+}
+
+.tb-warn {
+  background: rgba(241, 196, 77, 0.15);
+  color: var(--amber-s);
+  border: 1px solid rgba(241, 196, 77, 0.3);
+}
+
+.tb-fail {
+  background: rgba(237, 33, 36, 0.15);
+  color: var(--red-s);
+  border: 1px solid rgba(237, 33, 36, 0.3);
+}
+
+.tb-stop {
+  background: rgba(100, 116, 139, 0.15);
+  color: #94a3b8;
+  border: 1px solid rgba(100, 116, 139, 0.3);
+}
+
+.tb-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* ── ALERT BADGES ── */
+
+.al-badge {
+  padding: 1px 7px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.alb-crit {
+  background: rgba(237, 33, 36, 0.2);
+  color: var(--red-s);
+}
+
+.alb-warn {
+  background: rgba(241, 196, 77, 0.2);
+  color: var(--amber-s);
+}
+
+.alb-info {
+  background: rgba(65, 120, 217, 0.2);
+  color: var(--kpmg-blue-light);
+}
+
+/* ── PILL BADGES (Cards) ── */
+
+.pill {
+  padding: 2px 7px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.po {
+  background: rgba(0, 51, 141, 0.3);
+  border: 1px solid rgba(65, 120, 217, 0.3);
+  color: var(--kpmg-blue-light);
+}
+
+.pt {
+  background: rgba(0, 163, 161, 0.12);
+  border: 1px solid rgba(0, 163, 161, 0.25);
+  color: var(--kpmg-green);
+}
+
+/* ── INLINE LABELS ── */
+
+.badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.badge-primary {
+  background: rgba(65, 120, 217, 0.2);
+  color: var(--kpmg-blue-light);
+}
+
+.badge-success {
+  background: rgba(38, 153, 36, 0.2);
+  color: var(--green-s);
+}
+
+.badge-warning {
+  background: rgba(241, 196, 77, 0.2);
+  color: var(--amber-s);
+}
+
+.badge-danger {
+  background: rgba(237, 33, 36, 0.2);
+  color: var(--red-s);
+}

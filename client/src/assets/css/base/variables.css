@@ -1,0 +1,46 @@
+/* ══════════════════════════════════════════════════════════════════
+   THEME VARIABLES & COLOR PALETTE
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── KPMG PRIMARY — Pantone 287 C ── */
+  --kpmg-blue: #003087;
+  --kpmg-blue-mid: #0051BA;
+  --kpmg-blue-light: #0072CE;
+  --kpmg-blue-dark: #00205B;
+
+  /* ── KPMG SECONDARY — Official KPMG Brand Guidelines PDF ── */
+  --kpmg-medium-blue: #005EB8;   /* Pantone 7691 C — Medium Blue */
+  --kpmg-light-blue: #0091DA;    /* Pantone 7461 C — Light Blue */
+  --kpmg-light-purple: #483698;  /* Pantone 2105 C — Light Purple */
+  --kpmg-violet: #470A68;        /* Pantone 2617 C — Violet */
+  --kpmg-purple: #6D2077;        /* Pantone 259 C — Purple */
+  --kpmg-green: #00A3A1;         /* Pantone 2402 C — Green */
+
+  /* ── KPMG TRAFFIC LIGHT — charts & data only ── */
+  --kpmg-red: #ED2124;
+  --kpmg-yellow: #F1C44D;
+  --kpmg-lime: #269924;
+
+  /* ── SURFACES — white/light theme ── */
+  --surface-0: #FFFFFF;          /* page background */
+  --surface-1: #F0F5FC;          /* cards, panels */
+  --surface-2: #E2ECF8;          /* slightly deeper blue-white */
+
+  /* ── BORDERS & ACCENTS ── */
+  --border: rgba(0, 48, 135, 0.13);
+  --border-hover: rgba(0, 48, 135, 0.32);
+
+  /* ── TEXT — dark blue on white ── */
+  --text-primary: #002060;
+  --text-secondary: #1A4480;
+  --text-muted: #6B88B0;
+
+  /* ── TYPOGRAPHY ── */
+  --font: Arial, 'Helvetica Neue', Helvetica, sans-serif;
+
+  /* ── STATUS INDICATORS — traffic-light palette ── */
+  --green-s: #269924;
+  --amber-s: #F1C44D;
+  --red-s: #ED2124;
+}

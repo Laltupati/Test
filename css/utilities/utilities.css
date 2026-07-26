@@ -1,0 +1,194 @@
+/* ══════════════════════════════════════════════════════════════════
+   UTILITY CLASSES & CHARTS
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── EXECUTION STATS ── */
+
+.estat-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+
+.estat-row:last-child {
+  border-bottom: none;
+}
+
+.estat-label {
+  color: var(--text-secondary);
+}
+
+.estat-val {
+  font-weight: 700;
+  color: #fff;
+}
+
+/* ── MINI BAR CHART ── */
+
+.chart-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 80px;
+  padding-top: 8px;
+}
+
+.bar-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.bar {
+  width: 100%;
+  border-radius: 3px 3px 0 0;
+  background: var(--kpmg-blue-light);
+  opacity: 0.8;
+  transition: opacity 0.2s;
+  min-height: 4px;
+}
+
+.bar:hover {
+  opacity: 1;
+}
+
+.bar-lbl {
+  font-size: 9px;
+  color: var(--text-muted);
+  font-weight: 700;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* ── TECH USAGE BARS ── */
+
+.tech-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.tech-row:last-child {
+  margin-bottom: 0;
+}
+
+.tech-name {
+  font-size: 12px;
+  color: var(--text-secondary);
+  width: 60px;
+  flex-shrink: 0;
+}
+
+.tech-bar-bg {
+  flex: 1;
+  height: 8px;
+  background: rgba(65, 120, 217, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.tech-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  background: var(--kpmg-blue-light);
+}
+
+.tech-count {
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  width: 28px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* ── SPARKLINES ── */
+
+.sparkline {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 40px;
+}
+
+.sp-bar {
+  width: 8px;
+  border-radius: 2px 2px 0 0;
+  background: var(--kpmg-blue-light);
+  opacity: 0.6;
+}
+
+/* ── ACTIVE FILTER CHIPS ── */
+
+.active-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+  min-height: 0;
+}
+
+.active-chips:empty {
+  margin-bottom: 0;
+}
+
+.achip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  background: rgba(0, 51, 141, 0.3);
+  border: 1px solid var(--kpmg-blue-light);
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--kpmg-blue-light);
+}
+
+.achip-x {
+  cursor: pointer;
+  opacity: 0.7;
+  font-size: 12px;
+  transition: opacity 0.15s;
+}
+
+.achip-x:hover {
+  opacity: 1;
+}
+
+/* ── TOOLTIP ── */
+
+.tooltip {
+  position: fixed;
+  background: linear-gradient(135deg, rgba(0, 20, 50, 0.98), rgba(0, 35, 70, 0.98));
+  color: #fff;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(65, 120, 217, 0.6);
+  font-size: 13px;
+  line-height: 1.5;
+  max-width: 380px;
+  z-index: 9999;
+  pointer-events: none;
+  white-space: normal;
+  word-wrap: break-word;
+  box-shadow: 0 0 20px rgba(65, 120, 217, 0.5), 0 0 40px rgba(65, 120, 217, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 8px 32px rgba(0, 0, 0, 0.8);
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.tooltip.show {
+  opacity: 1;
+  transform: translateY(0);
+  box-shadow: 0 0 25px rgba(65, 120, 217, 0.7), 0 0 50px rgba(65, 120, 217, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 8px 32px rgba(0, 0, 0, 0.8);
+}
+
+.card-desc {
+  position: relative;
+}

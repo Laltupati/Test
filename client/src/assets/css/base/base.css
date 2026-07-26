@@ -1,0 +1,50 @@
+/* ══════════════════════════════════════════════════════════════════
+   BASE STYLES — white/blue theme
+   ═══════════════════════════════════════════════════════════════════ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font);
+  background: #FFFFFF;
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── SUBTLE BACKGROUND PATTERN (very light blue dots on white) ── */
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(rgba(0, 48, 135, 0.045) 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── NO DARK GLOW — clean white page ── */
+body::after { display: none; }
+
+.glow-br { display: none; }
+
+/* ── SCROLLBAR STYLING ── */
+
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F0F5FC;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 48, 135, 0.25);
+  border-radius: 3px;
+}

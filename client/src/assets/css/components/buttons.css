@@ -1,0 +1,215 @@
+/* ══════════════════════════════════════════════════════════════════
+   BUTTONS
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── LARGE BUTTON (Primary) ── */
+
+.btn-l {
+  flex: 1;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: var(--font);
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  border: none;
+  background: var(--kpmg-blue);
+  color: #fff;
+  transition: background 0.15s, box-shadow 0.15s, transform 0.15s;
+}
+
+.btn-l:hover {
+  background: var(--kpmg-blue-mid);
+  box-shadow: 0 4px 16px rgba(0, 51, 141, 0.5);
+  transform: translateY(-1px);
+}
+
+.btn-l:disabled {
+  background: rgba(65, 120, 217, 0.15);
+  color: var(--text-muted);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ── GHOST BUTTON ── */
+
+.btn-g {
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: var(--font);
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.btn-g:hover {
+  border-color: var(--kpmg-blue-mid);
+  color: var(--kpmg-blue);
+  background: rgba(0, 48, 135, 0.08);
+}
+
+/* ── ICON / INFO BUTTON ── */
+
+.btn-i {
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  border: 1.5px solid rgba(0, 48, 135, 0.45);
+  background: transparent;
+  color: var(--kpmg-blue);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: var(--font);
+  letter-spacing: 0.04em;
+  transition: background 0.18s, border-color 0.18s, color 0.18s;
+  flex-shrink: 0;
+}
+
+.btn-i:hover {
+  background: var(--kpmg-blue);
+  border-color: var(--kpmg-blue);
+  color: #fff;
+}
+
+/* ── APPLY BUTTON ── */
+
+.btn-apply {
+  width: 100%;
+  padding: 9px;
+  border-radius: 5px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: var(--font);
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  border: none;
+  background: var(--kpmg-blue);
+  color: #fff;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+
+.btn-apply:hover {
+  background: var(--kpmg-blue-mid);
+  box-shadow: 0 4px 16px rgba(0, 51, 141, 0.5);
+}
+
+/* ── TABLE BUTTONS ── */
+
+.tbl-btns {
+  display: flex;
+  gap: 5px;
+}
+
+.tbl-btn {
+  padding: 3px 10px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--font);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  transition: all 0.15s;
+}
+
+.tbl-btn:hover {
+  border-color: var(--kpmg-blue-mid);
+  color: #fff;
+}
+
+.tbl-btn.view {
+  background: rgba(0, 51, 141, 0.25);
+  border-color: var(--kpmg-blue-light);
+  color: var(--kpmg-blue-light);
+}
+
+.tbl-btn.red-btn {
+  border-color: rgba(237, 33, 36, 0.4);
+  color: var(--red-s);
+}
+
+.tbl-btn.green-btn {
+  border-color: rgba(38, 153, 36, 0.4);
+  color: var(--green-s);
+}
+
+/* ── DEMO BUTTON ── */
+
+.btn-demo {
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--font);
+  background: rgba(0, 163, 161, 0.15);
+  border: 1px solid rgba(0, 163, 161, 0.3);
+  color: var(--kpmg-green);
+  transition: all 0.15s;
+}
+
+.btn-demo:hover {
+  background: rgba(0, 163, 161, 0.25);
+}
+
+/* ── VIEW BUTTON ── */
+
+.btn-view {
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--font);
+  background: rgba(0, 51, 141, 0.25);
+  border: 1px solid var(--kpmg-blue-light);
+  color: var(--kpmg-blue-light);
+  transition: all 0.15s;
+}
+
+.btn-view:hover {
+  background: rgba(65, 120, 217, 0.25);
+}
+
+/* ── PAGINATION BUTTONS ── */
+
+.pg-btn {
+  padding: 5px 11px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: var(--font);
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  transition: all 0.15s;
+}
+
+.pg-btn:hover {
+  border-color: var(--kpmg-blue-mid);
+  color: #fff;
+}
+
+.pg-btn.active {
+  background: var(--kpmg-blue);
+  border-color: var(--kpmg-blue);
+  color: #fff;
+}
+
+.pg-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}

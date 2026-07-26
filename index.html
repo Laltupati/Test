@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI CoE Portal — KPMG</title>
+
+  <!-- ════════════════════════════════════════════════════════════════
+       CSS MAIN AGGREGATOR - Imports all stylesheets in correct order
+       ════════════════════════════════════════════════════════════════ -->
+
+  <link rel="stylesheet" href="css/main.css">
+
+</head>
+<body>
+  <div class="glow-br"></div>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       HEADER & NAVIGATION
+       ════════════════════════════════════════════════════════════════ -->
+  <header>
+    <div class="h-left">
+      <a class="logo" href="#">
+        <!-- KPMG official wordmark — white version for dark background -->
+        <svg class="logo-svg" viewBox="0 0 190 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- K -->
+          <path d="M8 8H16V26L30 8H40L24 28L41 52H31L18 32V52H8V8Z" fill="white"/>
+          <!-- P -->
+          <path d="M46 8H64C72 8 78 14 78 22C78 30 72 36 64 36H56V52H46V8ZM56 16V28H63C67 28 69 26 69 22C69 18 67 16 63 16H56Z" fill="white"/>
+          <!-- M -->
+          <path d="M84 8H94L104 32L114 8H124V52H115V24L106 44H102L93 24V52H84V8Z" fill="white"/>
+          <!-- G -->
+          <path d="M164 30H175V44C171 50 165 53 157 53C145 53 136 44 136 30C136 16 145 7 157 7C164 7 170 10 174 16L167 21C165 18 161 16 157 16C150 16 146 22 146 30C146 38 150 44 157 44C161 44 164 42 166 39V38H157V30H164Z" fill="white"/>
+        </svg>
+        <div class="logo-rule"></div>
+        <div class="logo-sub">AI Centre of Excellence</div>
+      </a>
+      <div class="h-sep"></div>
+      <nav class="page-tabs">
+        <button class="page-tab active" onclick="switchPage('usecases',this)">
+          ⊞ &nbsp;Use Cases
+        </button>
+        <button class="page-tab" onclick="switchPage('admin',this)">
+          🔒 &nbsp;Admin Panel
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         PAGE 1 — USE CASES
+         ═══════════════════════════════════════════════════════════════ -->
+    <div class="page active" id="page-usecases">
+
+      <!-- BANNER -->
+      <div class="banner">
+        <div class="banner-bg"></div>
+        <div class="banner-orb"></div>
+        <div class="banner-orb2"></div>
+        <svg class="banner-graphic" viewBox="0 0 420 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="320" cy="60" r="120" stroke="white" stroke-width="0.6"/>
+          <circle cx="320" cy="60" r="85" stroke="white" stroke-width="0.5"/>
+          <circle cx="320" cy="60" r="52" stroke="white" stroke-width="0.4"/>
+          <circle cx="320" cy="60" r="22" fill="white" opacity="0.2"/>
+          <line x1="100" y1="40" x2="235" y2="60" stroke="white" stroke-width="0.8"/>
+          <line x1="100" y1="40" x2="180" y2="120" stroke="white" stroke-width="0.6"/>
+          <line x1="235" y1="60" x2="320" y2="60" stroke="white" stroke-width="0.8"/>
+          <line x1="180" y1="120" x2="235" y2="60" stroke="white" stroke-width="0.5"/>
+          <line x1="180" y1="120" x2="310" y2="155" stroke="white" stroke-width="0.5"/>
+          <line x1="310" y1="155" x2="320" y2="60" stroke="white" stroke-width="0.4"/>
+          <circle cx="100" cy="40" r="5" fill="white" opacity="0.6"/>
+          <circle cx="235" cy="60" r="4" fill="white" opacity="0.5"/>
+          <circle cx="180" cy="120" r="5" fill="white" opacity="0.5"/>
+          <circle cx="310" cy="155" r="3.5" fill="white" opacity="0.4"/>
+          <circle cx="50" cy="140" r="3" fill="white" opacity="0.3"/>
+          <line x1="50" y1="140" x2="100" y2="40" stroke="white" stroke-width="0.4"/>
+          <line x1="50" y1="140" x2="180" y2="120" stroke="white" stroke-width="0.4"/>
+        </svg>
+        <div class="banner-content">
+          <div>
+            <div class="banner-tag"><div class="banner-tag-dot"></div>AI Use Case Catalogue</div>
+            <h1 class="banner-title">Intelligent Solutions<br><span class="bac">Built for Every Team</span></h1>
+            <p class="banner-sub">Explore and launch AI tools developed by the Centre of Excellence empowering every team across KPMG, powered by Azure OpenAI.</p>
+          </div>
+          <div class="banner-stats">
+            <div class="bstat"><div class="bstat-val">11<em>+</em></div><div class="bstat-lbl">Solutions</div></div>
+            <div class="bstat"><div class="bstat-val">5</div><div class="bstat-lbl">Domains</div></div>
+            <div class="bstat"><div class="bstat-val">40<em>%</em></div><div class="bstat-lbl">Time Saved</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FILTER + SEARCH + GRID WRAPPER -->
+      <div class="discovery-wrap">
+
+        <!-- LEFT: Filter Panel -->
+        <div class="filter-panel">
+          <div class="fp-header">
+            <span class="fp-title">Filters</span>
+            <button class="fp-reset" onclick="resetFilters()">Reset</button>
+          </div>
+
+          <!-- Domain -->
+          <div class="fg open" id="fg-domain">
+            <div class="fg-head" onclick="toggleFg('fg-domain')">
+              <span class="fg-label">Domain</span>
+              <span class="fg-arrow">▼</span>
+            </div>
+            <div class="fg-body">
+              <div class="cb-row" data-filter="domain" data-val="banking-finance" onclick="toggleCb(this)"><div class="cb-box"><span class="cb-tick">✓</span></div><span class="cb-label">Banking &amp; Finance</span><span class="cb-count">4</span></div>
+              <div class="cb-row" data-filter="domain" data-val="hr" onclick="toggleCb(this)"><div class="cb-box"><span class="cb-tick">✓</span></div><span class="cb-label">HR</span><span class="cb-count">2</span></div>
+              <div class="cb-row" data-filter="domain" data-val="healthcare" onclick="toggleCb(this)"><div class="cb-box"><span class="cb-tick">✓</span></div><span class="cb-label">HealthCare</span><span class="cb-count">1</span></div>
+              <div class="cb-row" data-filter="domain" data-val="insurance" onclick="toggleCb(this)"><div class="cb-box"><span class="cb-tick">✓</span></div><span class="cb-label">Insurance</span><span class="cb-count">1</span></div>
+              <div class="cb-row" data-filter="domain" data-val="technology" onclick="toggleCb(this)"><div class="cb-box"><span class="cb-tick">✓</span></div><span class="cb-label">Technology</span><span class="cb-count">3</span></div>
+            </div>
+          </div>
+
+          <!-- Technology -->
+          <div class="fg open" id="fg-tech">
+            <div class="fg-head" onclick="toggleFg('fg-tech')">
+              <span class="fg-label">Technology</span>
+              <span class="fg-arrow">▼</span>
+            </div>
+            <div class="fg-body">
+              <div class="cb-row" data-filter="tech" data-val="genai" onclick="toggleCb(this)"><div class="cb-box"><span class="cb-tick">✓</span></div><span class="cb-label">GenAI and Agentic AI</span><span class="cb-count">9</span></div>
+              <div class="cb-row" data-filter="tech" data-val="rag" onclick="toggleCb(this)"><div class="cb-box"><span class="cb-tick">✓</span></div><span class="cb-label">RAG</span><span class="cb-count">4</span></div>
+              <div class="cb-row" data-filter="tech" data-val="nlp" onclick="toggleCb(this)"><div class="cb-box"><span class="cb-tick">✓</span></div><span class="cb-label">NLP</span><span class="cb-count">5</span></div>
+              <div class="cb-row" data-filter="tech" data-val="llm" onclick="toggleCb(this)"><div class="cb-box"><span class="cb-tick">✓</span></div><span class="cb-label">LLM</span><span class="cb-count">6</span></div>
+              <div class="cb-row" data-filter="tech" data-val="computer-vision" onclick="toggleCb(this)"><div class="cb-box"><span class="cb-tick">✓</span></div><span class="cb-label">Computer Vision</span><span class="cb-count">1</span></div>
+            </div>
+          </div>
+
+          <!-- Capabilities -->
+          <div class="fg open" id="fg-cap">
+            <div class="fg-head" onclick="toggleFg('fg-cap')">
+              <span class="fg-label">Capabilities</span>
+              <span class="fg-arrow">▼</span>
+            </div>
+            <div class="fg-body">
+              <div class="cb-row" data-filter="cap" data-val="content-generation" onclick="toggleCb(this)"><div class="cb-box"><span class="cb-tick">✓</span></div><span class="cb-label">Content Generation</span><span class="cb-count">5</span></div>
+              <div class="cb-row" data-filter="cap" data-val="text-summarization" onclick="toggleCb(this)"><div class="cb-box"><span class="cb-tick">✓</span></div><span class="cb-label">Text Summarization</span><span class="cb-count">3</span></div>
+              <div class="cb-row" data-filter="cap" data-val="classification" onclick="toggleCb(this)"><div class="cb-box"><span class="cb-tick">✓</span></div><span class="cb-label">Classification/Regression</span><span class="cb-count">4</span></div>
+              <div class="cb-row" data-filter="cap" data-val="qa-systems" onclick="toggleCb(this)"><div class="cb-box"><span class="cb-tick">✓</span></div><span class="cb-label">Q&amp;A Systems</span><span class="cb-count">3</span></div>
+              <div class="cb-row" data-filter="cap" data-val="document-analysis" onclick="toggleCb(this)"><div class="cb-box"><span class="cb-tick">✓</span></div><span class="cb-label">Document Analysis</span><span class="cb-count">4</span></div>
+            </div>
+          </div>
+
+          <!-- Status -->
+          <div class="fg open" id="fg-status">
+            <div class="fg-head" onclick="toggleFg('fg-status')">
+              <span class="fg-label">Status</span>
+              <span class="fg-arrow">▼</span>
+            </div>
+            <div class="fg-body">
+              <div class="cb-row" data-filter="status" data-val="live" onclick="toggleCb(this)"><div class="cb-box"><span class="cb-tick">✓</span></div><span class="cb-label">Live</span><span class="cb-count">8</span></div>
+              <div class="cb-row" data-filter="status" data-val="beta" onclick="toggleCb(this)"><div class="cb-box"><span class="cb-tick">✓</span></div><span class="cb-label">Beta</span><span class="cb-count">1</span></div>
+              <div class="cb-row" data-filter="status" data-val="demo" onclick="toggleCb(this)"><div class="cb-box"><span class="cb-tick">✓</span></div><span class="cb-label">Demo</span><span class="cb-count">1</span></div>
+              <div class="cb-row" data-filter="status" data-val="coming-soon" onclick="toggleCb(this)"><div class="cb-box"><span class="cb-tick">✓</span></div><span class="cb-label">Coming Soon</span><span class="cb-count">1</span></div>
+            </div>
+          </div>
+
+          <div class="fp-apply">
+            <button class="btn-apply" onclick="applyFilters()">Apply Filters</button>
+          </div>
+        </div>
+
+        <!-- RIGHT: Search + Active chips + Grid -->
+        <div class="discovery-right">
+          <div class="search-row">
+            <button class="filter-toggle active" id="filterToggle" onclick="toggleFilter()">
+              ⧉ Filters
+            </button>
+            <div class="search-wrap">
+              <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              <input class="search-input" id="si" type="text" placeholder="Search solutions by name or keyword…" oninput="applyFilters()">
+            </div>
+          </div>
+          <div class="active-chips" id="activeChips"></div>
+          <div class="grid" id="grid">
+
+            <div class="card" data-c="hr" data-t="proscreener" data-domain="hr" data-tech="genai nlp llm" data-cap="document-analysis classification" data-status="live" style="--dc:#4178D9">
+              <div class="card-bar"></div>
+              <div class="card-vis"><div class="vis-bg" style="background:linear-gradient(145deg,#001233,#001f5c)"><svg viewBox="0 0 320 130"><circle cx="260" cy="15" r="90" fill="none" stroke="#4178D9" stroke-width="0.8"/><circle cx="260" cy="15" r="65" fill="none" stroke="#4178D9" stroke-width="0.6"/><circle cx="260" cy="15" r="42" fill="none" stroke="#4178D9" stroke-width="0.5"/><line x1="50" y1="55" x2="175" y2="35" stroke="#4178D9" stroke-width="0.8"/><line x1="50" y1="75" x2="175" y2="85" stroke="#4178D9" stroke-width="0.6"/><circle cx="50" cy="55" r="3.5" fill="#4178D9"/><circle cx="175" cy="35" r="3.5" fill="#4178D9"/></svg></div><div class="card-icon">👤</div><div class="card-st s-live">Live</div></div>
+              <div class="card-body"><div class="card-dom">HR &amp; Talent</div><div class="card-title">Proscreener</div><div class="card-desc" data-tooltip="Streamlines the hiring process by identifying top talent through intelligent CV screening and automated candidate ranking.">Streamlines the hiring process by identifying top talent through intelligent CV screening and automated candidate ranking.</div><div class="card-meta"><div class="meta-row"><div class="meta-k">Output</div><div class="pills"><span class="pill po">PDF</span><span class="pill po">DOCX</span></div></div><div class="meta-row"><div class="meta-k">Tools</div><div class="pills"><span class="pill pt">Azure OpenAI</span><span class="pill pt">Doc Intelligence</span></div></div></div></div>
+              <div class="card-foot"><button class="btn-l">Launch</button><button class="btn-i" type="button" aria-label="View tool details" aria-expanded="false" data-tool-info="proscreener">Info</button></div>
+            </div>
+
+            <div class="card" data-c="data" data-t="natural language data querying" data-domain="banking-finance technology" data-tech="genai nlp llm" data-cap="qa-systems document-analysis" data-status="live" style="--dc:#00A3A1">
+              <div class="card-bar"></div>
+              <div class="card-vis"><div class="vis-bg" style="background:linear-gradient(145deg,#001a18,#00322e)"><svg viewBox="0 0 320 130"><rect x="18" y="28" width="130" height="8" rx="2" fill="#00A3A1"/><rect x="18" y="44" width="100" height="5" rx="2" fill="#00A3A1"/><rect x="18" y="57" width="115" height="5" rx="2" fill="#00A3A1"/><rect x="175" y="22" width="128" height="96" rx="5" fill="none" stroke="#00A3A1" stroke-width="0.8"/><line x1="192" y1="48" x2="287" y2="48" stroke="#00A3A1" stroke-width="0.8"/><line x1="192" y1="62" x2="275" y2="62" stroke="#00A3A1" stroke-width="0.6"/><line x1="192" y1="76" x2="268" y2="76" stroke="#00A3A1" stroke-width="0.5"/></svg></div><div class="card-icon">🗄</div><div class="card-st s-live">Live</div></div>
+              <div class="card-body"><div class="card-dom">Data &amp; Analytics</div><div class="card-title">Natural Language Data Querying</div><div class="card-desc" data-tooltip="SQL Query Assistant — converts plain English questions into optimized SQL queries against your enterprise data warehouse.">SQL Query Assistant — converts plain English questions into optimized SQL queries against your enterprise data warehouse.</div><div class="card-meta"><div class="meta-row"><div class="meta-k">Output</div><div class="pills"><span class="pill po">SQL Query</span><span class="pill po">Results</span></div></div><div class="meta-row"><div class="meta-k">Tools</div><div class="pills"><span class="pill pt">Azure SQL</span><span class="pill pt">OpenAI</span></div></div></div></div>
+              <div class="card-foot"><button class="btn-l">Launch</button><button class="btn-i" type="button" aria-label="View tool details" aria-expanded="false" data-tool-info="natural-language-data-querying">Info</button></div>
+            </div>
+
+            <div class="card" data-c="ops" data-t="bank complaint automation" data-domain="banking-finance insurance" data-tech="genai rag nlp" data-cap="text-summarization classification qa-systems" data-status="live" style="--dc:#6D2077">
+              <div class="card-bar"></div>
+              <div class="card-vis"><div class="vis-bg" style="background:linear-gradient(145deg,#1a0510,#300a1e)"><svg viewBox="0 0 320 130"><path d="M18 108 Q78 38 138 68 Q198 98 258 28" stroke="#6D2077" stroke-width="1.5" fill="none"/><circle cx="138" cy="68" r="4.5" fill="#6D2077"/><circle cx="78" cy="68" r="3" fill="#6D2077"/><circle cx="258" cy="28" r="4" fill="#6D2077"/></svg></div><div class="card-icon">📋</div><div class="card-st s-live">Live</div></div>
+              <div class="card-body"><div class="card-dom">Operations</div><div class="card-title">Bank Complaint Automation</div><div class="card-desc" data-tooltip="AI-powered complaints management that streamlines and automates the end-to-end complaints handling process for financial institutions.">AI-powered complaints management that streamlines and automates the end-to-end complaints handling process for financial institutions.</div><div class="card-meta"><div class="meta-row"><div class="meta-k">Output</div><div class="pills"><span class="pill po">Case Report</span><span class="pill po">Resolution</span></div></div><div class="meta-row"><div class="meta-k">Tools</div><div class="pills"><span class="pill pt">Azure OpenAI</span><span class="pill pt">AI Search</span></div></div></div></div>
+              <div class="card-foot"><button class="btn-l">Launch</button><button class="btn-i" type="button" aria-label="View tool details" aria-expanded="false" data-tool-info="bank-complaint-automation">Info</button></div>
+            </div>
+
+            <div class="card" data-c="tech" data-t="archi-made-easy" data-domain="technology" data-tech="genai computer-vision llm" data-cap="document-analysis classification" data-status="demo" style="--dc:#470A68">
+              <div class="card-bar"></div>
+              <div class="card-vis"><div class="vis-bg" style="background:linear-gradient(145deg,#0e0720,#1a1040)"><svg viewBox="0 0 320 130"><rect x="28" y="48" width="44" height="38" rx="4" fill="none" stroke="#470A68" stroke-width="0.9"/><rect x="138" y="28" width="44" height="38" rx="4" fill="none" stroke="#470A68" stroke-width="0.9"/><rect x="248" y="48" width="44" height="38" rx="4" fill="none" stroke="#470A68" stroke-width="0.9"/><line x1="72" y1="67" x2="138" y2="47" stroke="#470A68" stroke-width="0.7"/><line x1="182" y1="47" x2="248" y2="67" stroke="#470A68" stroke-width="0.7"/></svg></div><div class="card-icon">🏗</div><div class="card-st s-demo">Demo</div></div>
+              <div class="card-body"><div class="card-dom">Technology</div><div class="card-title">Archi-Made-Easy</div><div class="card-desc" data-tooltip="A buddy to every technology architect — analyzes, compares and deciphers complex architectural diagrams using generative AI vision models.">A buddy to every technology architect — analyzes, compares and deciphers complex architectural diagrams using generative AI vision models.</div><div class="card-meta"><div class="meta-row"><div class="meta-k">Output</div><div class="pills"><span class="pill po">Analysis</span><span class="pill po">Comparison</span></div></div><div class="meta-row"><div class="meta-k">Tools</div><div class="pills"><span class="pill pt">Vision AI</span><span class="pill pt">Azure OpenAI</span></div></div></div></div>
+              <div class="card-foot"><button class="btn-l">Launch</button><button class="btn-g">Watch Demo</button><button class="btn-i" type="button" aria-label="View tool details" aria-expanded="false" data-tool-info="archi-made-easy">Info</button></div>
+            </div>
+
+            <div class="card" data-c="ops" data-t="pro-manager" data-domain="banking-finance technology healthcare insurance hr" data-tech="genai llm" data-cap="content-generation document-analysis" data-status="live" style="--dc:#0091DA">
+              <div class="card-bar"></div>
+              <div class="card-vis"><div class="vis-bg" style="background:linear-gradient(145deg,#1a0e00,#2e1800)"><svg viewBox="0 0 320 130"><circle cx="160" cy="65" r="52" fill="none" stroke="#0091DA" stroke-width="0.8" stroke-dasharray="4 3"/><circle cx="160" cy="65" r="33" fill="none" stroke="#0091DA" stroke-width="0.8"/><circle cx="160" cy="65" r="7" fill="#0091DA" opacity="0.6"/></svg></div><div class="card-icon">📊</div><div class="card-st s-live">Live</div></div>
+              <div class="card-body"><div class="card-dom">Operations</div><div class="card-title">Pro-Manager</div><div class="card-desc" data-tooltip="One-stop project management solution harnessing AI and GenAI to make project activities efficient across the full engagement lifecycle.">One-stop project management solution harnessing AI and GenAI to make project activities efficient across the full engagement lifecycle.</div><div class="card-meta"><div class="meta-row"><div class="meta-k">Output</div><div class="pills"><span class="pill po">Dashboard</span><span class="pill po">Reports</span></div></div><div class="meta-row"><div class="meta-k">Tools</div><div class="pills"><span class="pill pt">Azure OpenAI</span><span class="pill pt">SQL</span></div></div></div></div>
+              <div class="card-foot"><button class="btn-l">Launch</button><button class="btn-i" type="button" aria-label="View tool details" aria-expanded="false" data-tool-info="pro-manager">Info</button></div>
+            </div>
+
+            <div class="card" data-c="hr" data-t="resume creator" data-domain="hr" data-tech="genai nlp llm" data-cap="content-generation document-analysis" data-status="live" style="--dc:#4178D9">
+              <div class="card-bar"></div>
+              <div class="card-vis"><div class="vis-bg" style="background:linear-gradient(145deg,#001233,#001f5c)"><svg viewBox="0 0 320 130"><rect x="70" y="18" width="180" height="96" rx="5" fill="none" stroke="#4178D9" stroke-width="0.8"/><rect x="86" y="32" width="65" height="6" rx="2" fill="#4178D9"/><rect x="86" y="47" width="148" height="4" rx="2" fill="#4178D9"/><rect x="86" y="59" width="130" height="4" rx="2" fill="#4178D9"/><rect x="86" y="71" width="138" height="4" rx="2" fill="#4178D9"/></svg></div><div class="card-icon">📄</div><div class="card-st s-live">Live</div></div>
+              <div class="card-body"><div class="card-dom">HR &amp; Talent</div><div class="card-title">Resume Creator</div><div class="card-desc" data-tooltip="Generates polished KPMG Profile Slides from raw CV data — standardized, KPMG-branded, and ready for client proposals.">Generates polished KPMG Profile Slides from raw CV data — standardized, KPMG-branded, and ready for client proposals.</div><div class="card-meta"><div class="meta-row"><div class="meta-k">Output</div><div class="pills"><span class="pill po">PPTX</span><span class="pill po">DOCX</span></div></div><div class="meta-row"><div class="meta-k">Tools</div><div class="pills"><span class="pill pt">Doc Intelligence</span><span class="pill pt">OpenAI</span></div></div></div></div>
+              <div class="card-foot"><button class="btn-l">Launch</button><button class="btn-i" type="button" aria-label="View tool details" aria-expanded="false" data-tool-info="resume-creator">Info</button></div>
+            </div>
+
+            <div class="card" data-c="tech" data-t="tom asset comparisons" data-domain="banking-finance insurance technology" data-tech="genai rag llm" data-cap="classification text-summarization" data-status="beta" style="--dc:#6D2077">
+              <div class="card-bar"></div>
+              <div class="card-vis"><div class="vis-bg" style="background:linear-gradient(145deg,#160510,#2a0a20)"><svg viewBox="0 0 320 130"><rect x="28" y="18" width="120" height="96" rx="5" fill="none" stroke="#6D2077" stroke-width="0.8"/><rect x="172" y="18" width="120" height="96" rx="5" fill="none" stroke="#6D2077" stroke-width="0.8"/><line x1="148" y1="66" x2="172" y2="66" stroke="#6D2077" stroke-width="1.5"/></svg></div><div class="card-icon">⚖</div><div class="card-st s-beta">Beta</div></div>
+              <div class="card-body"><div class="card-dom">Technology</div><div class="card-title">TOM Asset Comparisons</div><div class="card-desc" data-tooltip="Security controls and role-based process flow comparison for Target Operating Model assessments across asset classes.">Security controls and role-based process flow comparison for Target Operating Model assessments across asset classes.</div><div class="card-meta"><div class="meta-row"><div class="meta-k">Output</div><div class="pills"><span class="pill po">Comparison</span><span class="pill po">XLSX</span></div></div><div class="meta-row"><div class="meta-k">Tools</div><div class="pills"><span class="pill pt">AI Search</span><span class="pill pt">Blob Storage</span></div></div></div></div>
+              <div class="card-foot"><button class="btn-l">Launch</button><button class="btn-i" type="button" aria-label="View tool details" aria-expanded="false" data-tool-info="tom-asset-comparisons">Info</button></div>
+            </div>
+
+            <div class="card" data-c="finance" data-t="financial outlook generator" data-domain="banking-finance" data-tech="genai nlp llm rag" data-cap="content-generation text-summarization document-analysis" data-status="live" style="--dc:#269924">
+              <div class="card-bar"></div>
+              <div class="card-vis"><div class="vis-bg" style="background:linear-gradient(145deg,#051a10,#0a3020)"><svg viewBox="0 0 320 130"><polyline points="18,108 68,83 118,93 168,53 218,68 268,28" stroke="#269924" stroke-width="1.5" fill="none"/><circle cx="168" cy="53" r="4.5" fill="#269924"/><circle cx="268" cy="28" r="4" fill="#269924"/></svg></div><div class="card-icon">📈</div><div class="card-st s-live">Live</div></div>
+              <div class="card-body"><div class="card-dom">Finance</div><div class="card-title">Financial Outlook Generator</div><div class="card-desc" data-tooltip="Creates comprehensive financial and market outlook reports with AI-generated insights, trend analysis, and strategic recommendations.">Creates comprehensive financial and market outlook reports with AI-generated insights, trend analysis, and strategic recommendations.</div><div class="card-meta"><div class="meta-row"><div class="meta-k">Output</div><div class="pills"><span class="pill po">PDF</span><span class="pill po">DOCX</span><span class="pill po">PPTX</span></div></div><div class="meta-row"><div class="meta-k">Tools</div><div class="pills"><span class="pill pt">Azure OpenAI</span><span class="pill pt">Excel Parser</span></div></div></div></div>
+              <div class="card-foot"><button class="btn-l">Launch</button><button class="btn-i" type="button" aria-label="View tool details" aria-expanded="false" data-tool-info="financial-outlook-generator">Info</button></div>
+            </div>
+
+            <div class="card" data-c="tech" data-t="test case generator" data-domain="technology" data-tech="genai nlp llm" data-cap="classification document-analysis" data-status="coming-soon" style="--dc:#470A68">
+              <div class="card-bar"></div>
+              <div class="card-vis"><div class="vis-bg" style="background:linear-gradient(145deg,#0d0820,#1a1040)"><svg viewBox="0 0 320 130"><rect x="18" y="18" width="284" height="20" rx="3" fill="#470A68" opacity="0.3" stroke="#470A68" stroke-width="0.8"/><rect x="18" y="48" width="284" height="14" rx="3" fill="#470A68" opacity="0.15"/><rect x="18" y="70" width="220" height="14" rx="3" fill="#470A68" opacity="0.15"/></svg></div><div class="card-icon">🧪</div><div class="card-st s-soon">Coming Soon</div></div>
+              <div class="card-body"><div class="card-dom">Technology</div><div class="card-title">Test Case Generator</div><div class="card-desc" data-tooltip="Automates test case generation from requirements documents, reducing manual QA effort across software projects.">Automates test case generation from requirements documents, reducing manual QA effort across software projects.</div><div class="card-meta"><div class="meta-row"><div class="meta-k">Output</div><div class="pills"><span class="pill po">XLSX</span><span class="pill po">PPTX Ref</span></div></div><div class="meta-row"><div class="meta-k">Tools</div><div class="pills"><span class="pill pt">Azure OpenAI</span><span class="pill pt">Doc Intelligence</span></div></div></div></div>
+              <div class="card-foot"><button class="btn-l" disabled>Coming Soon</button><button class="btn-i" type="button" aria-label="View tool details" aria-expanded="false" data-tool-info="test-case-generator">Info</button></div>
+            </div>
+
+            <div class="card" data-c="data" data-t="power bi publication scoreboard" data-domain="banking-finance healthcare technology" data-tech="nlp llm" data-cap="classification text-summarization" data-status="live" style="--dc:#F1C44D">
+              <div class="card-bar"></div>
+              <div class="card-vis"><div class="vis-bg" style="background:linear-gradient(145deg,#1a1400,#2e2200)"><svg viewBox="0 0 320 130"><rect x="18" y="88" width="44" height="38" rx="3" fill="#F1C44D" opacity="0.35"/><rect x="74" y="68" width="44" height="58" rx="3" fill="#F1C44D" opacity="0.3"/><rect x="130" y="48" width="44" height="78" rx="3" fill="#F1C44D" opacity="0.38"/><rect x="186" y="33" width="44" height="93" rx="3" fill="#F1C44D" opacity="0.32"/><rect x="242" y="53" width="44" height="73" rx="3" fill="#F1C44D" opacity="0.28"/></svg></div><div class="card-icon">📊</div><div class="card-st s-live">Live</div></div>
+              <div class="card-body"><div class="card-dom">Data &amp; Analytics</div><div class="card-title">Power BI Publication Scoreboard</div><div class="card-desc" data-tooltip="Tracks and visualizes content performance metrics for internal Power BI publications and marketing communications.">Tracks and visualizes content performance metrics for internal Power BI publications and marketing communications.</div><div class="card-meta"><div class="meta-row"><div class="meta-k">Output</div><div class="pills"><span class="pill po">Dashboard</span><span class="pill po">XLSX</span></div></div><div class="meta-row"><div class="meta-k">Tools</div><div class="pills"><span class="pill pt">Power BI</span><span class="pill pt">Azure SQL</span></div></div></div></div>
+              <div class="card-foot"><button class="btn-l">Launch</button><button class="btn-i" type="button" aria-label="View tool details" aria-expanded="false" data-tool-info="power-bi-publication-scoreboard">Info</button></div>
+            </div>
+
+            <div class="card" data-c="tech" data-t="utility studio" data-domain="technology banking-finance hr" data-tech="genai llm" data-cap="content-generation qa-systems" data-status="live" style="--dc:#00A3A1">
+              <div class="card-bar"></div>
+              <div class="card-vis"><div class="vis-bg" style="background:linear-gradient(145deg,#001a18,#003530)"><svg viewBox="0 0 320 130"><polygon points="160,18 215,48 215,98 160,118 105,98 105,48" fill="none" stroke="#00A3A1" stroke-width="0.9"/><polygon points="160,38 200,60 200,94 160,108 120,94 120,60" fill="none" stroke="#00A3A1" stroke-width="0.7"/><circle cx="160" cy="78" r="6" fill="#00A3A1" opacity="0.5"/></svg></div><div class="card-icon">⚙</div><div class="card-st s-live">Live</div></div>
+              <div class="card-body"><div class="card-dom">Technology</div><div class="card-title">Utility Studio</div><div class="card-desc" data-tooltip="Prompt engineering learning platform — build, test, and iterate on prompts with structured templates and performance benchmarking.">Prompt engineering learning platform — build, test, and iterate on prompts with structured templates and performance benchmarking.</div><div class="card-meta"><div class="meta-row"><div class="meta-k">Output</div><div class="pills"><span class="pill po">Prompt Library</span><span class="pill po">Benchmarks</span></div></div><div class="meta-row"><div class="meta-k">Tools</div><div class="pills"><span class="pill pt">Azure OpenAI</span><span class="pill pt">Blob Storage</span></div></div></div></div>
+              <div class="card-foot"><button class="btn-l">Launch</button><button class="btn-i" type="button" aria-label="View tool details" aria-expanded="false" data-tool-info="utility-studio">Info</button></div>
+            </div>
+
+          </div><!-- /grid -->
+        </div><!-- /discovery-right -->
+      </div><!-- /discovery-wrap -->
+    </div><!-- /page-usecases -->
+
+    <!-- ══════════════════════════════════════════════════════════════
+         PAGE 2 — ADMIN PANEL
+         ═══════════════════════════════════════════════════════════════ -->
+    <div class="page" id="page-admin">
+
+      <!-- SYSTEM HEALTH -->
+      <div class="sec-title">System Health Overview</div>
+      <div class="health-row">
+        <div class="hcard">
+          <div class="hcard-icon hc-green">✅</div>
+          <div class="hcard-info">
+            <div class="hcard-val">Operational</div>
+            <div class="hcard-lbl">System Status</div>
+            <div class="hcard-sub sub-green">All systems normal</div>
+          </div>
+        </div>
+        <div class="hcard">
+          <div class="hcard-icon hc-blue">🤖</div>
+          <div class="hcard-info">
+            <div class="hcard-val">10 / 11</div>
+            <div class="hcard-lbl">Active Solutions</div>
+            <div class="hcard-sub sub-blue">1 coming soon</div>
+          </div>
+        </div>
+        <div class="hcard">
+          <div class="hcard-icon hc-red">⚠</div>
+          <div class="hcard-info">
+            <div class="hcard-val">1</div>
+            <div class="hcard-lbl">Failed Agents</div>
+            <div class="hcard-sub sub-red">Archi-Made-Easy</div>
+          </div>
+        </div>
+        <div class="hcard">
+          <div class="hcard-icon hc-amber">⏱</div>
+          <div class="hcard-info">
+            <div class="hcard-val">1.8s</div>
+            <div class="hcard-lbl">Avg Response Time</div>
+            <div class="hcard-sub sub-amber">+0.3s vs yesterday</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MONITORING TABLE + ALERTS -->
+      <div class="two-col" style="margin-bottom:20px;">
+
+        <!-- Agent Monitoring -->
+        <div class="panel">
+          <div class="sec-title" style="margin-bottom:14px;">Real-Time Agent Monitoring</div>
+          <table class="mon-table">
+            <thead>
+              <tr>
+                <th>Solution</th>
+                <th>Status</th>
+                <th>Health</th>
+                <th>Requests</th>
+                <th>Success</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Proscreener</td>
+                <td><span class="tbadge tb-run"><span class="tb-dot"></span>Running</span></td>
+                <td><div class="pbar-wrap"><div class="pbar g" style="width:92%"></div></div></td>
+                <td>1,245</td>
+                <td>98.5%</td>
+                <td><div class="tbl-btns"><button class="tbl-btn view">View</button><button class="tbl-btn">⏸</button></div></td>
+              </tr>
+              <tr>
+                <td>NL Data Query</td>
+                <td><span class="tbadge tb-run"><span class="tb-dot"></span>Running</span></td>
+                <td><div class="pbar-wrap"><div class="pbar g" style="width:95%"></div></div></td>
+                <td>892</td>
+                <td>94.2%</td>
+                <td><div class="tbl-btns"><button class="tbl-btn view">View</button><button class="tbl-btn">⏸</button></div></td>
+              </tr>
+              <tr>
+                <td>Bank Complaints</td>
+                <td><span class="tbadge tb-fail"><span class="tb-dot"></span>Failed</span></td>
+                <td><div class="pbar-wrap"><div class="pbar r" style="width:15%"></div></div></td>
+                <td>456</td>
+                <td>15.8%</td>
+                <td><div class="tbl-btns"><button class="tbl-btn view">View</button><button class="tbl-btn green-btn">▶</button><button class="tbl-btn red-btn">✕</button></div></td>
+              </tr>
+              <tr>
+                <td>Financial Outlook</td>
+                <td><span class="tbadge tb-run"><span class="tb-dot"></span>Running</span></td>
+                <td><div class="pbar-wrap"><div class="pbar g" style="width:91%"></div></div></td>
+                <td>678</td>
+                <td>91.3%</td>
+                <td><div class="tbl-btns"><button class="tbl-btn view">View</button><button class="tbl-btn">⏸</button></div></td>
+              </tr>
+              <tr>
+                <td>NL Query Agent</td>
+                <td><span class="tbadge tb-warn"><span class="tb-dot"></span>Warning</span></td>
+                <td><div class="pbar-wrap"><div class="pbar a" style="width:68%"></div></div></td>
+                <td>523</td>
+                <td>72.4%</td>
+                <td><div class="tbl-btns"><button class="tbl-btn view">View</button><button class="tbl-btn">⏸</button></div></td>
+              </tr>
+              <tr>
+                <td>Archi-Made-Easy</td>
+                <td><span class="tbadge tb-stop"><span class="tb-dot"></span>Stopped</span></td>
+                <td><div class="pbar-wrap"><div class="pbar" style="width:0%"></div></div></td>
+                <td>0</td>
+                <td>N/A</td>
+                <td><div class="tbl-btns"><button class="tbl-btn view">View</button><button class="tbl-btn green-btn">▶</button><button class="tbl-btn red-btn">✕</button></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Alerts -->
+        <div class="panel">
+          <div class="sec-title" style="margin-bottom:14px;">Active Alerts &amp; Notifications</div>
+          <div class="alert-item al-crit">
+            <div class="al-icon">🔴</div>
+            <div class="al-body">
+              <div class="al-msg">CRITICAL: Bank Complaints agent failed — Model endpoint unavailable</div>
+              <div class="al-time">2 min ago</div>
+            </div>
+            <div class="al-badge alb-crit">CRITICAL</div>
+          </div>
+          <div class="alert-item al-warn">
+            <div class="al-icon">🟡</div>
+            <div class="al-body">
+              <div class="al-msg">WARNING: NL Query Agent performance degraded — Response time increased by 45%</div>
+              <div class="al-time">15 min ago</div>
+            </div>
+            <div class="al-badge alb-warn">WARNING</div>
+          </div>
+          <div class="alert-item al-info">
+            <div class="al-icon">🔵</div>
+            <div class="al-body">
+              <div class="al-msg">INFO: System maintenance scheduled for tonight at 2:00 AM EST (approx. 30 min downtime)</div>
+              <div class="al-time">1 hour ago</div>
+            </div>
+            <div class="al-badge alb-info">INFO</div>
+          </div>
+          <div class="alert-item al-info" style="margin-top:8px;">
+            <div class="al-icon">🔵</div>
+            <div class="al-body">
+              <div class="al-msg">INFO: Financial Outlook Generator v2.1 deployment completed successfully</div>
+              <div class="al-time">3 hours ago</div>
+            </div>
+            <div class="al-badge alb-info">INFO</div>
+          </div>
+
+          <!-- Exec stats inside alerts panel -->
+          <div style="margin-top:20px;">
+            <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">Execution Statistics</div>
+            <div class="estat-row"><span class="estat-label">Total Use Cases Count</span><span class="estat-val">11</span></div>
+            <div class="estat-row"><span class="estat-label">Use Case Pass Count</span><span class="estat-val">27</span></div>
+            <div class="estat-row"><span class="estat-label">Active Right Now</span><span class="estat-val">4</span></div>
+            <div class="estat-row"><span class="estat-label">Total Requests Today</span><span class="estat-val">3,794</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CHARTS ROW -->
+      <div class="three-col">
+
+        <!-- Use Case Visit Frequency -->
+        <div class="panel">
+          <div class="sec-title" style="margin-bottom:14px;">Use Case Visit Frequency</div>
+          <div class="chart-bars">
+            <div class="bar-wrap"><div class="bar" style="height:85%;background:#4178D9"></div><div class="bar-lbl">RAG</div></div>
+            <div class="bar-wrap"><div class="bar" style="height:72%;background:#4178D9"></div><div class="bar-lbl">Chatbot</div></div>
+            <div class="bar-wrap"><div class="bar" style="height:60%;background:#4178D9"></div><div class="bar-lbl">Summ.</div></div>
+            <div class="bar-wrap"><div class="bar" style="height:48%;background:#4178D9"></div><div class="bar-lbl">Class.</div></div>
+            <div class="bar-wrap"><div class="bar" style="height:65%;background:#4178D9"></div><div class="bar-lbl">Finance</div></div>
+            <div class="bar-wrap"><div class="bar" style="height:40%;background:#4178D9"></div><div class="bar-lbl">TOM</div></div>
+            <div class="bar-wrap"><div class="bar" style="height:55%;background:#4178D9"></div><div class="bar-lbl">ProMgr</div></div>
+          </div>
+        </div>
+
+        <!-- Top Technologies -->
+        <div class="panel">
+          <div class="sec-title" style="margin-bottom:14px;">Top Technologies Used</div>
+          <div style="margin-top:8px;">
+            <div class="tech-row"><div class="tech-name">GenAI</div><div class="tech-bar-bg"><div class="tech-bar-fill" style="width:90%;background:#470A68"></div></div><div class="tech-count">45</div></div>
+            <div class="tech-row"><div class="tech-name">RAG</div><div class="tech-bar-bg"><div class="tech-bar-fill" style="width:70%;background:#4178D9"></div></div><div class="tech-count">35</div></div>
+            <div class="tech-row"><div class="tech-name">NLP</div><div class="tech-bar-bg"><div class="tech-bar-fill" style="width:100%;background:#00A3A1"></div></div><div class="tech-count">70</div></div>
+            <div class="tech-row"><div class="tech-name">Chatbot</div><div class="tech-bar-bg"><div class="tech-bar-fill" style="width:80%;background:#0091DA"></div></div><div class="tech-count">60</div></div>
+            <div class="tech-row"><div class="tech-name">Vision AI</div><div class="tech-bar-bg"><div class="tech-bar-fill" style="width:35%;background:#6D2077"></div></div><div class="tech-count">18</div></div>
+          </div>
+        </div>
+
+        <!-- Agent Performance Sparklines -->
+        <div class="panel">
+          <div class="sec-title" style="margin-bottom:14px;">Performance — Last 24h</div>
+          <div style="display:flex;flex-direction:column;gap:12px;margin-top:4px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <div style="font-size:12px;font-weight:700;color:var(--text-secondary);width:120px;">Proscreener</div>
+              <div class="sparkline">
+                <div class="sp-bar" style="height:60%;background:var(--green-s)"></div><div class="sp-bar" style="height:75%"></div><div class="sp-bar" style="height:55%"></div><div class="sp-bar" style="height:90%;background:var(--green-s)"></div><div class="sp-bar" style="height:80%"></div><div class="sp-bar" style="height:85%;background:var(--green-s)"></div>
+              </div>
+              <div style="font-size:12px;font-weight:700;color:var(--green-s);width:40px;text-align:right;">98.5%</div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <div style="font-size:12px;font-weight:700;color:var(--text-secondary);width:120px;">NL Data Query</div>
+              <div class="sparkline">
+                <div class="sp-bar" style="height:70%"></div><div class="sp-bar" style="height:80%;background:var(--green-s)"></div><div class="sp-bar" style="height:75%"></div><div class="sp-bar" style="height:90%;background:var(--green-s)"></div><div class="sp-bar" style="height:85%"></div><div class="sp-bar" style="height:88%;background:var(--green-s)"></div>
+              </div>
+              <div style="font-size:12px;font-weight:700;color:var(--green-s);width:40px;text-align:right;">94.2%</div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <div style="font-size:12px;font-weight:700;color:var(--text-secondary);width:120px;">Bank Complaints</div>
+              <div class="sparkline">
+                <div class="sp-bar" style="height:80%;background:var(--green-s)"></div><div class="sp-bar" style="height:75%"></div><div class="sp-bar" style="height:60%"></div><div class="sp-bar" style="height:40%;background:var(--amber-s)"></div><div class="sp-bar" style="height:20%;background:var(--red-s)"></div><div class="sp-bar" style="height:10%;background:var(--red-s)"></div>
+              </div>
+              <div style="font-size:12px;font-weight:700;color:var(--red-s);width:40px;text-align:right;">15.8%</div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <div style="font-size:12px;font-weight:700;color:var(--text-secondary);width:120px;">Financial Outlook</div>
+              <div class="sparkline">
+                <div class="sp-bar" style="height:85%;background:var(--green-s)"></div><div class="sp-bar" style="height:88%"></div><div class="sp-bar" style="height:82%;background:var(--green-s)"></div><div class="sp-bar" style="height:90%;background:var(--green-s)"></div><div class="sp-bar" style="height:86%"></div><div class="sp-bar" style="height:91%;background:var(--green-s)"></div>
+              </div>
+              <div style="font-size:12px;font-weight:700;color:var(--green-s);width:40px;text-align:right;">91.3%</div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <div style="font-size:12px;font-weight:700;color:var(--text-secondary);width:120px;">NL Query Agent</div>
+              <div class="sparkline">
+                <div class="sp-bar" style="height:88%;background:var(--green-s)"></div><div class="sp-bar" style="height:85%"></div><div class="sp-bar" style="height:78%"></div><div class="sp-bar" style="height:70%;background:var(--amber-s)"></div><div class="sp-bar" style="height:65%;background:var(--amber-s)"></div><div class="sp-bar" style="height:72%;background:var(--amber-s)"></div>
+              </div>
+              <div style="font-size:12px;font-weight:700;color:var(--amber-s);width:40px;text-align:right;">72.4%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /page-admin -->
+
+  </main>
+
+  <!-- JS Config must load before modules -->
+  <script src="js/config/constants.js"></script>
+  <script src="js/main.js"></script>
+
+</body>
+</html>

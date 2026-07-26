@@ -1,0 +1,179 @@
+/* ══════════════════════════════════════════════════════════════
+   SKELETON LOADER — shimmer animation system
+   Used on CategoryPage, UseCases, and AiAgents while the
+   backend API is resolving.
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Base shimmer keyframe ── */
+@keyframes sk-shimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position:  600px 0; }
+}
+
+.sk-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--surface-1) 25%,
+    rgba(0, 48, 135, 0.06) 50%,
+    var(--surface-1) 75%
+  );
+  background-size: 600px 100%;
+  animation: sk-shimmer 1.5s infinite linear;
+  border-radius: 6px;
+}
+
+/* ── Generic block ── */
+.sk-block {
+  height: 14px;
+  border-radius: 6px;
+}
+
+/* ══ CATEGORY PAGE SKELETON ═══════════════════════════════════ */
+
+.sk-cat-section {
+  padding: 0 0 40px 0;
+}
+
+.sk-cat-section-title {
+  width: 160px;
+  height: 16px;
+  margin-bottom: 20px;
+}
+
+.sk-cat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.sk-cat-tile {
+  height: 200px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+/* ══ USE-CASE CARD SKELETON ═══════════════════════════════════ */
+
+.sk-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 22px;
+  padding: 24px 28px;
+}
+
+.sk-card {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 210px;
+  position: relative;
+  overflow: hidden;
+}
+
+.sk-card-image {
+  height: 130px;
+  border-radius: 8px;
+  width: 100%;
+}
+
+.sk-card-badge {
+  width: 60px;
+  height: 20px;
+  border-radius: 20px;
+  position: absolute;
+  top: 18px;
+  right: 18px;
+}
+
+.sk-card-title {
+  width: 70%;
+  height: 15px;
+}
+
+.sk-card-desc-1 {
+  width: 100%;
+  height: 12px;
+}
+
+.sk-card-desc-2 {
+  width: 85%;
+  height: 12px;
+}
+
+.sk-card-btn {
+  width: 90px;
+  height: 32px;
+  border-radius: 6px;
+  margin-top: auto;
+}
+
+/* ══ JOURNEY SOLUTIONS SKELETON ════════════════════════════════ */
+
+.sk-solutions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+}
+
+.sk-sol-card {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 140px;
+}
+
+.sk-sol-title {
+  width: 60%;
+  height: 13px;
+}
+
+.sk-sol-status {
+  width: 45px;
+  height: 20px;
+  border-radius: 10px;
+  align-self: flex-end;
+  margin-top: -26px;
+}
+
+.sk-sol-line {
+  height: 11px;
+}
+
+.sk-sol-line-short {
+  height: 11px;
+  width: 75%;
+}
+
+.sk-sol-btn {
+  height: 30px;
+  border-radius: 5px;
+  width: 100%;
+  margin-top: auto;
+}
+
+/* ══ FILTER BAR SKELETON ═══════════════════════════════════════ */
+
+.sk-filter-bar {
+  padding: 14px 28px 0;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.sk-pill {
+  width: 80px;
+  height: 28px;
+  border-radius: 20px;
+}
+
+.sk-pill-wide { width: 110px; }
+.sk-pill-sm   { width: 60px;  }

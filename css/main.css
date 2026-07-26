@@ -1,0 +1,27 @@
+/* ═══════════════════════════════════════════════════════════════════
+   CSS AGGREGATOR - Main Entry Point for All Stylesheets
+   Import order is critical for cascading and specificity
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* BASE: Variables, Reset, Foundation */
+@import url('base/variables.css');
+@import url('base/reset.css');
+@import url('base/base.css');
+@import url('base/typography.css');
+
+/* LAYOUT: Structure, Grid, Page Containers */
+@import url('layout/header.css');
+@import url('layout/pages.css');
+@import url('layout/grid.css');
+
+/* COMPONENTS: UI Elements (cards, buttons, filters, etc.) */
+@import url('components/banner.css');
+@import url('components/cards.css');
+@import url('components/filters.css');
+@import url('components/buttons.css');
+@import url('components/alerts.css');
+@import url('components/tables.css');
+@import url('components/badges.css');
+
+/* UTILITIES: Helper classes, charts, tooltips, spacing */
+@import url('utilities/utilities.css');

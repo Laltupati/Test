@@ -1,0 +1,269 @@
+/* ══════════════════════════════════════════════════════════════════
+   CATEGORY HUB PAGE
+   ═══════════════════════════════════════════════════════════════════ */
+
+.category-page {
+  flex: 1;
+  background: var(--surface-0);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── PAGE HEADER ── */
+
+.category-hero {
+  padding: 52px 60px 40px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, #EEF4FF 0%, #FFFFFF 100%);
+}
+
+.category-hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--kpmg-blue-light);
+  text-transform: none;
+  margin-bottom: 14px;
+}
+
+.category-hero-eyebrow span {
+  cursor: pointer;
+  opacity: 0.65;
+  transition: opacity 0.2s;
+}
+.category-hero-eyebrow span:hover { opacity: 1; }
+
+.category-hero h1 {
+  font-size: 36px;
+  font-weight: 700;
+  color: #002060;
+  letter-spacing: -0.02em;
+  margin: 0 0 10px;
+}
+
+.category-hero p {
+  font-size: 15px;
+  color: var(--text-secondary);
+  max-width: 560px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ── SECTION GROUP ── */
+
+.category-section {
+  padding: 44px 60px 0;
+}
+
+.category-section-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #002060;
+  letter-spacing: -0.01em;
+  margin-bottom: 24px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #003087;
+}
+
+/* ── TILE GRID ── */
+
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+/* ── STICKY FILTER SIDEBAR ── */
+
+.category-sidebar {
+  position: sticky;
+  top: 84px;
+  align-self: flex-start;
+  max-height: calc(100vh - 120px);
+}
+
+.category-sidebar-inner {
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+}
+
+/* ── INDIVIDUAL TILE ── */
+
+.cat-tile {
+  position: relative;
+  height: 200px;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 1px solid rgba(65, 120, 217, 0.15);
+  transition: transform 0.28s cubic-bezier(0.22,1,0.36,1),
+              box-shadow 0.28s ease,
+              border-color 0.2s;
+}
+
+.cat-tile:hover {
+  transform: translateY(-3px) scale(1.005);
+  box-shadow: 0 8px 20px rgba(0, 48, 135, 0.12),
+              0 0 0 1px rgba(65,120,217,0.25);
+  border-color: rgba(65,120,217,0.3);
+}
+
+/* Background image */
+.cat-tile-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  transition: transform 0.4s ease;
+  filter: brightness(0.9) saturate(1.02);
+}
+
+.cat-tile:hover .cat-tile-bg {
+  transform: scale(1.06);
+  filter: brightness(0.82) saturate(1.06);
+}
+
+/* Dark gradient overlay so text is always readable */
+.cat-tile-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    160deg,
+    rgba(0, 16, 60, 0.22) 0%,
+    rgba(0, 12, 48, 0.55) 100%
+  );
+  transition: background 0.25s;
+}
+
+.cat-tile:hover .cat-tile-overlay {
+  background: linear-gradient(
+    160deg,
+    rgba(0, 16, 60, 0.28) 0%,
+    rgba(0, 12, 48, 0.65) 100%
+  );
+}
+
+/* Content */
+.cat-tile-content {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 22px 22px 20px;
+  gap: 10px;
+}
+
+.cat-tile-meta {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── Count: plain informational label, not clickable ── */
+.cat-tile-count {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #ffffff;
+  text-transform: none;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 4px;
+  padding: 3px 8px;
+  backdrop-filter: blur(4px);
+  pointer-events: none;
+  user-select: none;
+}
+
+.cat-tile-name {
+  font-size: 17px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  line-height: 1.2;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.6);
+}
+
+/* ── Button: clearly interactive with arrow ── */
+.cat-tile-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 18px;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  border: 1.5px solid rgba(255, 255, 255, 0.55);
+  border-radius: 6px;
+  cursor: pointer;
+  align-self: flex-start;
+  transition: background 0.2s, border-color 0.2s, transform 0.2s;
+  font-family: var(--font);
+  backdrop-filter: blur(4px);
+}
+
+.cat-tile:hover .cat-tile-btn {
+  background: #fff;
+  border-color: #fff;
+  color: var(--kpmg-blue);
+  transform: translateX(4px);
+}
+
+.cat-tile-btn svg {
+  transition: transform 0.2s;
+}
+.cat-tile:hover .cat-tile-btn svg {
+  transform: translateX(4px);
+}
+
+/* ── ACCENT LINE PER DOMAIN ── */
+.cat-tile::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 3px;
+  border-radius: 0 0 12px 12px;
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+.cat-tile:hover::after { opacity: 1; }
+
+.cat-tile::after { background: var(--kpmg-blue-light); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 1100px) {
+  .category-grid { grid-template-columns: repeat(2, 1fr); }
+  .category-hero, .category-section { padding-left: 36px; padding-right: 36px; }
+}
+
+@media (max-width: 680px) {
+  .category-grid { grid-template-columns: 1fr; }
+  .category-hero, .category-section { padding-left: 20px; padding-right: 20px; }
+  .category-hero h1 { font-size: 26px; }
+
+  .category-sidebar {
+    position: static;
+    max-height: none;
+  }
+
+  .category-sidebar-inner {
+    max-height: none;
+    overflow: visible;
+  }
+}
+
+.category-hero-banner {
+  position: relative;
+  z-index: 1;
+  padding: 10px 4px 0;
+}

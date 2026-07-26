@@ -1,0 +1,80 @@
+/* ══════════════════════════════════════════════════════════════════
+   ALERTS & NOTIFICATIONS
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── ALERT ITEMS ── */
+
+.alert-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  font-size: 12.5px;
+}
+
+.alert-item:last-child {
+  margin-bottom: 0;
+}
+
+.al-crit {
+  background: rgba(237, 33, 36, 0.08);
+  border: 1px solid rgba(237, 33, 36, 0.2);
+}
+
+.al-warn {
+  background: rgba(241, 196, 77, 0.08);
+  border: 1px solid rgba(241, 196, 77, 0.2);
+}
+
+.al-info {
+  background: rgba(65, 120, 217, 0.08);
+  border: 1px solid rgba(65, 120, 217, 0.2);
+}
+
+.al-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.al-body {
+  flex: 1;
+}
+
+.al-msg {
+  color: var(--text-primary);
+  font-weight: 700;
+  margin-bottom: 2px;
+  font-size: 12px;
+}
+
+.al-time {
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.al-badge {
+  padding: 1px 7px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.alb-crit {
+  background: rgba(237, 33, 36, 0.2);
+  color: var(--red-s);
+}
+
+.alb-warn {
+  background: rgba(241, 196, 77, 0.2);
+  color: var(--amber-s);
+}
+
+.alb-info {
+  background: rgba(65, 120, 217, 0.2);
+  color: var(--kpmg-blue-light);
+}

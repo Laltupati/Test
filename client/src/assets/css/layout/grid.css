@@ -1,0 +1,64 @@
+/* ═══════════════════════════════════════════════════════════════════
+   GRID & FLEX UTILITIES
+   Grid layouts, responsive columns, gap helpers
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── GRID LAYOUTS ── */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+  gap: 18px;
+}
+
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.three-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.four-col {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.health-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+/* ── RESPONSIVE GRIDS ── */
+
+@media (max-width: 1100px) {
+  .health-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .two-col,
+  .three-col,
+  .four-col {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 800px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .health-row {
+    grid-template-columns: 1fr;
+  }
+}
