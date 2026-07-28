@@ -50,17 +50,19 @@ const UseCaseCard = ({ uc, onInfoClick }) => {
         >
           Info
         </button>
-        <button 
-          className="btn-l" 
-          disabled={uc.status === 'Coming Soon'}
-          onClick={() => {
-            if (uc.launchUrl && uc.status !== 'Coming Soon') {
-              window.open(uc.launchUrl, '_blank');
-            }
-          }}
-        >
-          {uc.status === 'Coming Soon' ? 'Coming Soon' : 'Launch'}
-        </button>
+        {uc.launchUrl && (
+          <button 
+            className="btn-l" 
+            disabled={uc.status === 'Coming Soon'}
+            onClick={() => {
+              if (uc.launchUrl && uc.status !== 'Coming Soon') {
+                window.open(uc.launchUrl, '_blank');
+              }
+            }}
+          >
+            {uc.status === 'Coming Soon' ? 'Coming Soon' : 'Launch'}
+          </button>
+        )}
       </div>
     </div>
   );
