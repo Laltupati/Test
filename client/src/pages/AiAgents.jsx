@@ -365,7 +365,7 @@
 // export default AiAgents;
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { industries, processAreas, scenarios } from '../data/journeyData';
+import { industries, processAreas, horizontalProcessAreas, horizontalCenterArea, scenarios } from '../data/journeyData';
 import '../assets/css/journey.css';
 import { SkeletonJourneySolutions } from '../components/Skeleton';
 import AppIcon from '../components/AppIcon';
@@ -387,7 +387,8 @@ const CircularIndustryLayout = ({ items, selectedParentIndustry, onSelect, onSel
     'am-pe': 'Optimize asset management and private equity with intelligent portfolio and risk analysis.',
     'products': 'Accelerate product lifecycles and supply chains across retail, life sciences, and manufacturing.',
     'tmt': 'Drive innovation in technology, media, and telecommunications with advanced AI agents.',
-    'infrastructure-gov': 'Empower public sector and healthcare infrastructure with smart, compliant operational tools.'
+    'infrastructure-governance-healthcare': 'Empower public sector and healthcare infrastructure with smart, compliant operational tools.',
+    'horizontal': 'Cross-cutting AI tools applicable across all lines of business — from talent acquisition and project management to data generation and SQL automation.',
   };
 
   const handleNodeClick = (index) => {
@@ -497,66 +498,105 @@ const CircularIndustryLayout = ({ items, selectedParentIndustry, onSelect, onSel
 
 // ── PHASE 2: Process Area Selection ───────────────────────────────
 const ProcessGrid = ({ industry, onSelect, scenarioMap }) => {
-  const getCount = (processId) => {
-    const src = scenarioMap[industry.id] || scenarioMap['default'];
-    return (src?.[processId] || []).length;
-  };
+  const isHorizontal = industry.id === 'horizontal';
 
-  const getQuadrantClass = (procId) => {
-    switch (procId) {
-      case 'customer-service-ops': return 'quadrant-tl';
-      case 'corporate-services': return 'quadrant-tr';
-      case 'technology-solutions': return 'quadrant-bl';
-      case 'risk-services': return 'quadrant-br';
-      default: return 'quadrant-default';
-    }
-  };
+  // Standard 4 process areas layout
+  if (!isHorizontal) {
+    return (
+      <>
+        <div className="journey-section-title" style={{ textAlign: 'center' }}>{industry.label}</div>
+        <div className="journey-section-sub" style={{ textAlign: 'center' }}>
+          Select a process area to explore role-based scenarios and AI solutions.
+        </div>
+        <div className="process-rect-grid">
+          {processAreas.map(proc => (
+            <div
+              key={proc.id}
+              className="process-rect-card"
+              onClick={() => onSelect(proc)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={e => e.key === 'Enter' && onSelect(proc)}
+              aria-label={`Select ${proc.label}`}
+              style={{ '--industry-color': industry.color }}
+            >
+              <div className="process-rect-icon" style={{ color: industry.color }}>
+                <AppIcon name={proc.icon} size={32} strokeWidth={1.5} />
+              </div>
+              <div className="process-rect-label">{proc.label}</div>
+              <div className="process-rect-desc">{proc.description}</div>
+            </div>
+          ))}
+        </div>
+      </>
+    );
+  }
 
+  // Horizontal: 5-card layout — 2 top | PMO full-width | 2 bottom
+  const [topLeft, topRight, bottomLeft, bottomRight] = horizontalProcessAreas;
   return (
     <>
       <div className="journey-section-title" style={{ textAlign: 'center' }}>{industry.label}</div>
-
       <div className="journey-section-sub" style={{ textAlign: 'center' }}>
-        Select a process area to explore role-based scenarios and AI solutions.
+        Select a tool to explore role-based scenarios and AI solutions.
       </div>
-
-      <div className="circular-process-wrapper">
-        <div className="circular-process-container">
-          {/* Center Circle */}
-          <div 
-            className="process-center-circle"
-            style={{ color: industry.color }}
-          >
-            <div className="process-center-content">
-              {industry.label}
-            </div>
-          </div>
-
-          {/* 4 Quadrants */}
-          {processAreas.map(proc => {
-            const count = getCount(proc.id);
-            const quadrantClass = getQuadrantClass(proc.id);
-
-            return (
-              <div
-                key={proc.id}
-                className={`process-quadrant ${quadrantClass}`}
-                onClick={() => onSelect(proc)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={e => e.key === 'Enter' && onSelect(proc)}
-                aria-label={`Select ${proc.label}`}
-                style={{ '--industry-color': industry.color }}
-              >
-                <div className="quadrant-content">
-                  <div className="quadrant-icon-wrap" style={{ color: industry.color }}>
-                    <AppIcon name={proc.icon} size={28} strokeWidth={1.5} />
-                  </div>
-                  <div className="quadrant-label">{proc.label}</div>
-                </div>
+      <div className="process-horizontal-grid">
+        {/* Row 1 */}
+        <div className="process-horiz-row">
+          {[topLeft, topRight].map(proc => (
+            <div
+              key={proc.id}
+              className="process-rect-card"
+              onClick={() => onSelect(proc)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={e => e.key === 'Enter' && onSelect(proc)}
+              style={{ '--industry-color': industry.color }}
+            >
+              <div className="process-rect-icon" style={{ color: industry.color }}>
+                <AppIcon name={proc.icon} size={32} strokeWidth={1.5} />
               </div>
-            );
-          })}
+              <div className="process-rect-label">{proc.label}</div>
+              <div className="process-rect-desc">{proc.description}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Row 2 — PMO full width */}
+        <div
+          className="process-rect-card process-pmo-card"
+          onClick={() => onSelect(horizontalCenterArea)}
+          role="button"
+          tabIndex={0}
+          onKeyDown={e => e.key === 'Enter' && onSelect(horizontalCenterArea)}
+          style={{ '--industry-color': industry.color }}
+        >
+          <div className="process-rect-icon" style={{ color: industry.color }}>
+            <AppIcon name={horizontalCenterArea.icon} size={32} strokeWidth={1.5} />
+          </div>
+          <div className="process-rect-label">{horizontalCenterArea.label}</div>
+          <div className="process-rect-desc">{horizontalCenterArea.description}</div>
+        </div>
+
+        {/* Row 3 */}
+        <div className="process-horiz-row">
+          {[bottomLeft, bottomRight].map(proc => (
+            <div
+              key={proc.id}
+              className="process-rect-card"
+              onClick={() => onSelect(proc)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={e => e.key === 'Enter' && onSelect(proc)}
+              style={{ '--industry-color': industry.color }}
+            >
+              <div className="process-rect-icon" style={{ color: industry.color }}>
+                <AppIcon name={proc.icon} size={32} strokeWidth={1.5} />
+              </div>
+              <div className="process-rect-label">{proc.label}</div>
+              <div className="process-rect-desc">{proc.description}</div>
+            </div>
+          ))}
         </div>
       </div>
     </>
@@ -777,6 +817,7 @@ const AiAgents = () => {
       setSelectedIndustry(null);
       setSelectedProcess(null);
       setPhase(1);
+      window.history.pushState({ phase: 1, parentIndustry: ind, industry: null, process: null }, '');
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
@@ -784,6 +825,7 @@ const AiAgents = () => {
     setSelectedIndustry(ind);
     setSelectedProcess(null);
     setPhase(2);
+    window.history.pushState({ phase: 2, parentIndustry: selectedParentIndustry, industry: ind, process: null }, '');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -793,13 +835,14 @@ const AiAgents = () => {
     setSelectedIndustry(child);
     setSelectedProcess(null);
     setPhase(2);
+    window.history.pushState({ phase: 2, parentIndustry: parentGroup, industry: child, process: null }, '');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSelectProcess = (proc) => {
     setSelectedProcess(proc);
     setPhase(3);
-
+    window.history.pushState({ phase: 3, parentIndustry: selectedParentIndustry, industry: selectedIndustry, process: proc }, '');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -808,7 +851,7 @@ const AiAgents = () => {
     setSelectedParentIndustry(null);
     setSelectedIndustry(null);
     setSelectedProcess(null);
-
+    window.history.pushState({ phase: 1, parentIndustry: null, industry: null, process: null }, '');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -816,31 +859,45 @@ const AiAgents = () => {
     setPhase(1);
     setSelectedIndustry(null);
     setSelectedProcess(null);
-
+    window.history.pushState({ phase: 1, parentIndustry: selectedParentIndustry, industry: null, process: null }, '');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleGoPhase2 = () => {
     setPhase(2);
     setSelectedProcess(null);
-
+    window.history.pushState({ phase: 2, parentIndustry: selectedParentIndustry, industry: selectedIndustry, process: null }, '');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // ── Browser history integration ──────────────────────────────
+  useEffect(() => {
+    // Set initial state so we have a valid object on first pop
+    window.history.replaceState({ 
+      phase: 1, 
+      parentIndustry: null, 
+      industry: null, 
+      process: null 
+    }, '');
+
+    const handlePopState = (e) => {
+      const s = e.state;
+      if (s) {
+        setPhase(s.phase || 1);
+        setSelectedParentIndustry(s.parentIndustry || null);
+        setSelectedIndustry(s.industry || null);
+        setSelectedProcess(s.process || null);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
   const handleBack = () => {
-    if (phase === 3) {
-      handleGoPhase2();
-      return;
-    }
-
-    if (phase === 2) {
-      handleGoParent();
-      return;
-    }
-
-    if (phase === 1 && selectedParentIndustry) {
-      handleGoHome();
-    }
+    // Simply go back in browser history (which triggers popstate)
+    // instead of bloating the history stack with forward pushes.
+    window.history.back();
   };
 
   return (

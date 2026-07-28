@@ -98,6 +98,29 @@ header {
   opacity: 0.7;
 }
 
+/* Coming Soon nav tab */
+.page-tab-coming-soon {
+  opacity: 0.6;
+  cursor: not-allowed !important;
+  position: relative;
+}
+.page-tab-coming-soon:hover {
+  background: none;
+  color: rgba(255, 255, 255, 0.6);
+}
+.coming-soon-badge {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: rgba(255,255,255,0.25);
+  color: #fff;
+  border-radius: 4px;
+  padding: 2px 5px;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
 /* ── RESPONSIVE ── */
 
 @media (max-width: 800px) {

@@ -1243,6 +1243,19 @@
   padding: 16px;
   border: 2px solid var(--border-subtle, #eaeaea);
   color: var(--text-main);
+  transition: all 0.25s ease;
+}
+
+/* Clickable center (PMO for Horizontal) */
+.process-center-clickable:hover {
+  background-color: #003087;
+  color: #fff !important;
+  border-color: #003087;
+  box-shadow: 0 8px 32px rgba(0, 48, 135, 0.40);
+  transform: translate(-50%, -50%) scale(1.08);
+}
+.process-center-clickable:hover svg {
+  stroke: #fff;
 }
 
 .process-quadrant {
@@ -1329,3 +1342,110 @@
 .quadrant-tr { grid-area: 1 / 2 / 2 / 3; }
 .quadrant-bl { grid-area: 2 / 1 / 3 / 2; }
 .quadrant-br { grid-area: 2 / 2 / 3 / 3; }
+
+/* ---------------------------------------------------------------
+   RECTANGULAR PROCESS AREA CARDS (Phase 2)
+   --------------------------------------------------------------- */
+
+/* Standard 2x2 grid */
+.process-rect-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  max-width: 760px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+/* Shared card style */
+.process-rect-card {
+  background: #fff;
+  border: 1px solid #e5e9f0;
+  border-radius: 14px;
+  padding: 36px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.22s ease;
+  box-shadow: 0 2px 12px rgba(0, 48, 135, 0.06);
+  gap: 14px;
+}
+
+.process-rect-card:hover {
+  background-color: var(--industry-color, #003087);
+  border-color: var(--industry-color, #003087);
+  box-shadow: 0 8px 32px rgba(0, 48, 135, 0.18);
+  transform: translateY(-3px);
+}
+
+.process-rect-card:hover .process-rect-icon,
+.process-rect-card:hover .process-rect-label,
+.process-rect-card:hover .process-rect-desc {
+  color: #fff !important;
+}
+
+.process-rect-icon {
+  transition: color 0.22s ease;
+}
+
+.process-rect-label {
+  font-size: 16px;
+  font-weight: 700;
+  color: #003087;
+  transition: color 0.22s ease;
+}
+
+.process-rect-desc {
+  font-size: 13px;
+  color: #666;
+  line-height: 1.5;
+  max-width: 220px;
+  transition: color 0.22s ease;
+}
+
+/* -- Horizontal 5-card layout -- */
+.process-horizontal-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 760px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+.process-horiz-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+/* PMO full-width middle card */
+.process-pmo-card {
+  flex-direction: row;
+  justify-content: center;
+  gap: 24px;
+  padding: 28px 40px;
+  border: 1px solid #e5e9f0;
+  background: #fff;
+}
+
+.process-pmo-card:hover {
+  background-color: var(--industry-color, #003087);
+}
+
+.process-pmo-card .process-rect-label {
+  font-size: 18px;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .process-rect-grid,
+  .process-horiz-row {
+    grid-template-columns: 1fr;
+  }
+  .process-pmo-card {
+    flex-direction: column;
+  }
+}

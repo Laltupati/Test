@@ -50,6 +50,7 @@ import {
   ChevronLeft,
   ArrowRight,
   GitBranch,     // Lines of Business hero tag
+  GitMerge,      // Horizontal LOB
 } from 'lucide-react';
 
 const ICON_MAP = {
@@ -95,6 +96,7 @@ const ICON_MAP = {
   ChevronLeft,
   ArrowRight,
   GitBranch,
+  GitMerge,
 };
 
 /**

@@ -31,7 +31,15 @@ const Header = ({ activePage, setActivePage }) => {
             className={`page-tab ${activePage === 'aiagents' ? 'active' : ''}`} 
             onClick={() => setActivePage('aiagents')}
           >
-          AI Agents
+          Use Case 2
+          </button>
+          <button 
+            className="page-tab page-tab-coming-soon"
+            disabled
+            title="Coming Soon"
+          >
+            AI Agents
+            <span className="coming-soon-badge">Coming Soon</span>
           </button>
           <button 
             className={`page-tab ${activePage === 'admin' ? 'active' : ''}`} 
