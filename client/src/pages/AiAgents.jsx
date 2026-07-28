@@ -244,7 +244,7 @@
 
 //   // Fetch use cases from the backend API for linking solutions
 //   useEffect(() => {
-//     fetch('http://localhost:3000/api/use-cases')
+//     fetch('/api/use-cases')
 //       .then(res => res.json())
 //       .then(data => setUseCases(Array.isArray(data) ? data : []))
 //       .catch(err => console.error('Error fetching use cases:', err));
@@ -818,7 +818,7 @@ const AiAgents = () => {
 
   // Fetch use cases from the backend API for linking solutions
   useEffect(() => {
-    fetch('http://localhost:3000/api/use-cases')
+    fetch('/api/use-cases')
       .then(res => res.json())
       .then(data => { setUseCases(Array.isArray(data) ? data : []); setIsLoading(false); })
       .catch(err => { console.error('Error fetching use cases:', err); setIsLoading(false); });

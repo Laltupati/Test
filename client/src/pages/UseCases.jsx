@@ -49,7 +49,7 @@ const UseCases = ({ initialDomain = null, onBack }) => {
   }, [initialDomain]);
 
   useEffect(() => {
-    fetch('http://localhost:3000/api/use-cases')
+    fetch('/api/use-cases')
       .then(res => res.json())
       .then(data => { setUseCases(data); setIsLoading(false); })
       .catch(err => { console.error('Error fetching use cases:', err); setIsLoading(false); });

@@ -8,7 +8,7 @@ const Admin = () => {
   // });
 
   // useEffect(() => {
-  //   fetch('http://localhost:3000/api/system-health')
+  //   fetch('/api/system-health')
   //     .then(res => res.json())
   //     .then(fetchedData => setData(fetchedData))
   //     .catch(err => console.error("Error fetching system health data:", err));
