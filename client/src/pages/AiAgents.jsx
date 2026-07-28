@@ -500,7 +500,21 @@ const CircularIndustryLayout = ({ items, selectedParentIndustry, onSelect, onSel
 const ProcessGrid = ({ industry, onSelect, scenarioMap }) => {
   const isHorizontal = industry.id === 'horizontal';
 
-  // Standard 4 process areas layout
+  const getCount = (processId) => {
+    const src = scenarioMap[industry.id] || scenarioMap['default'];
+    return (src?.[processId] || []).length;
+  };
+
+  const getQuadrantClass = (procId) => {
+    switch (procId) {
+      case 'customer-service-ops': return 'quadrant-tl';
+      case 'corporate-services': return 'quadrant-tr';
+      case 'technology-solutions': return 'quadrant-bl';
+      case 'risk-services': return 'quadrant-br';
+      default: return 'quadrant-default';
+    }
+  };
+
   if (!isHorizontal) {
     return (
       <>
@@ -508,95 +522,101 @@ const ProcessGrid = ({ industry, onSelect, scenarioMap }) => {
         <div className="journey-section-sub" style={{ textAlign: 'center' }}>
           Select a process area to explore role-based scenarios and AI solutions.
         </div>
-        <div className="process-rect-grid">
-          {processAreas.map(proc => (
-            <div
-              key={proc.id}
-              className="process-rect-card"
-              onClick={() => onSelect(proc)}
-              role="button"
-              tabIndex={0}
-              onKeyDown={e => e.key === 'Enter' && onSelect(proc)}
-              aria-label={`Select ${proc.label}`}
-              style={{ '--industry-color': industry.color }}
-            >
-              <div className="process-rect-icon" style={{ color: industry.color }}>
-                <AppIcon name={proc.icon} size={32} strokeWidth={1.5} />
-              </div>
-              <div className="process-rect-label">{proc.label}</div>
-              <div className="process-rect-desc">{proc.description}</div>
+        <div className="circular-process-wrapper">
+          <div className="circular-process-container">
+            {/* Center Circle */}
+            <div className="process-center-circle" style={{ color: industry.color }}>
+              <div className="process-center-content">{industry.label}</div>
             </div>
-          ))}
+            {/* 4 Quadrants */}
+            {processAreas.map(proc => {
+              const count = getCount(proc.id);
+              const quadrantClass = getQuadrantClass(proc.id);
+              return (
+                <div
+                  key={proc.id}
+                  className={`process-quadrant ${quadrantClass}`}
+                  onClick={() => onSelect(proc)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={e => e.key === 'Enter' && onSelect(proc)}
+                  aria-label={`Select ${proc.label}`}
+                  style={{ '--industry-color': industry.color }}
+                >
+                  <div className="quadrant-content">
+                    <div className="quadrant-icon-wrap" style={{ color: industry.color }}>
+                      <AppIcon name={proc.icon} size={28} strokeWidth={1.5} />
+                    </div>
+                    <div className="quadrant-label">{proc.label}</div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </>
     );
   }
 
-  // Horizontal: 5-card layout — 2 top | PMO full-width | 2 bottom
-  const [topLeft, topRight, bottomLeft, bottomRight] = horizontalProcessAreas;
+  // 5-cut Horizontal layout
+  const SLICE_ANGLES = [-90, -18, 54, 126, 198];
+  
   return (
     <>
       <div className="journey-section-title" style={{ textAlign: 'center' }}>{industry.label}</div>
       <div className="journey-section-sub" style={{ textAlign: 'center' }}>
         Select a tool to explore role-based scenarios and AI solutions.
       </div>
-      <div className="process-horizontal-grid">
-        {/* Row 1 */}
-        <div className="process-horiz-row">
-          {[topLeft, topRight].map(proc => (
-            <div
-              key={proc.id}
-              className="process-rect-card"
-              onClick={() => onSelect(proc)}
-              role="button"
-              tabIndex={0}
-              onKeyDown={e => e.key === 'Enter' && onSelect(proc)}
-              style={{ '--industry-color': industry.color }}
-            >
-              <div className="process-rect-icon" style={{ color: industry.color }}>
-                <AppIcon name={proc.icon} size={32} strokeWidth={1.5} />
-              </div>
-              <div className="process-rect-label">{proc.label}</div>
-              <div className="process-rect-desc">{proc.description}</div>
-            </div>
-          ))}
-        </div>
+      <div className="circular-process-wrapper">
+        <div className="circular-process-container is-5-slice">
+          
+          {/* Slices layer */}
+          <div className="process-slices-layer">
+            {/* 5 lines separating the slices */}
+            {[...Array(5)].map((_, i) => (
+               <div 
+                 key={`divider-${i}`}
+                 className="slice-divider"
+                 style={{ transform: `rotate(${-54 + i * 72}deg)` }}
+               />
+            ))}
 
-        {/* Row 2 — PMO full width */}
-        <div
-          className="process-rect-card process-pmo-card"
-          onClick={() => onSelect(horizontalCenterArea)}
-          role="button"
-          tabIndex={0}
-          onKeyDown={e => e.key === 'Enter' && onSelect(horizontalCenterArea)}
-          style={{ '--industry-color': industry.color }}
-        >
-          <div className="process-rect-icon" style={{ color: industry.color }}>
-            <AppIcon name={horizontalCenterArea.icon} size={32} strokeWidth={1.5} />
+            {/* Render all 5 horizontal tools (4 outer + PMO) as pie slices */}
+            {horizontalProcessAreas.concat([horizontalCenterArea]).map((proc, idx) => {
+              const angle = SLICE_ANGLES[idx];
+              return (
+                <div 
+                  key={proc.id}
+                  className="process-slice"
+                  onClick={() => onSelect(proc)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={e => e.key === 'Enter' && onSelect(proc)}
+                  style={{ 
+                    '--industry-color': industry.color,
+                    transform: `rotate(${angle}deg)` 
+                  }}
+                >
+                  <div 
+                    className="process-slice-content"
+                    style={{ transform: `translate(-50%, -50%) rotate(${-angle}deg)` }}
+                  >
+                    <div className="quadrant-icon-wrap" style={{ color: industry.color, marginBottom: 8 }}>
+                      <AppIcon name={proc.icon} size={24} strokeWidth={1.5} />
+                    </div>
+                    <div className="quadrant-label" style={{ fontSize: 13, fontWeight: 700, color: industry.color }}>
+                      {proc.label}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-          <div className="process-rect-label">{horizontalCenterArea.label}</div>
-          <div className="process-rect-desc">{horizontalCenterArea.description}</div>
-        </div>
 
-        {/* Row 3 */}
-        <div className="process-horiz-row">
-          {[bottomLeft, bottomRight].map(proc => (
-            <div
-              key={proc.id}
-              className="process-rect-card"
-              onClick={() => onSelect(proc)}
-              role="button"
-              tabIndex={0}
-              onKeyDown={e => e.key === 'Enter' && onSelect(proc)}
-              style={{ '--industry-color': industry.color }}
-            >
-              <div className="process-rect-icon" style={{ color: industry.color }}>
-                <AppIcon name={proc.icon} size={32} strokeWidth={1.5} />
-              </div>
-              <div className="process-rect-label">{proc.label}</div>
-              <div className="process-rect-desc">{proc.description}</div>
-            </div>
-          ))}
+          {/* Center Circle stays completely inert for Horizontal, just as a label */}
+          <div className="process-center-circle" style={{ color: industry.color, zIndex: 10 }}>
+            <div className="process-center-content" style={{ fontWeight: 700 }}>{industry.label}</div>
+          </div>
         </div>
       </div>
     </>
