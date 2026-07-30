@@ -17,6 +17,11 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
 /* ── SUBTLE BACKGROUND PATTERN (very light blue dots on white) ── */
 
 body::before {

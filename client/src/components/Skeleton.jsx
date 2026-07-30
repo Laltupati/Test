@@ -37,14 +37,16 @@ export const SkeletonCategoryPage = ({ sections = 2, tilesPerSection = 4 }) => (
 /* ════════════════════════════════════════════════════════════
    2. USE CASE CARDS — agent card grid
    ════════════════════════════════════════════════════════════ */
-export const SkeletonUseCaseCards = ({ count = 8 }) => (
+export const SkeletonUseCaseCards = ({ count = 8, hideFilters = false }) => (
   <>
     {/* Filter bar shimmer */}
-    <div className="sk-filter-bar">
-      {['pill-wide', 'pill', 'pill-sm', 'pill', 'pill-wide', 'pill-sm'].map((v, i) => (
-        <Sk key={i} className={`sk-shimmer sk-pill sk-${v}`} />
-      ))}
-    </div>
+    {!hideFilters && (
+      <div className="sk-filter-bar">
+        {['pill-wide', 'pill', 'pill-sm', 'pill', 'pill-wide', 'pill-sm'].map((v, i) => (
+          <Sk key={i} className={`sk-shimmer sk-pill sk-${v}`} />
+        ))}
+      </div>
+    )}
 
     {/* Card grid shimmer */}
     <div className="sk-cards-grid">

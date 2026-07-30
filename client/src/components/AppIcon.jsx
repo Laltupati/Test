@@ -48,9 +48,30 @@ import {
   // Navigation / UI
   ChevronRight,
   ChevronLeft,
+  ChevronDown,
+  ChevronUp,
   ArrowRight,
   GitBranch,     // Lines of Business hero tag
   GitMerge,      // Horizontal LOB
+
+  // Stats Icons
+  Bot,
+  Layers,
+  
+  // UI Extras
+  Clock,
+  MousePointer2,
+  Grid,
+  LayoutGrid,
+  Tag,
+  X,
+  SlidersHorizontal,
+
+  // Detail Page
+  MessageSquareText,
+  Award,
+  Mail,
+  ExternalLink,
 } from 'lucide-react';
 
 const ICON_MAP = {
@@ -94,9 +115,30 @@ const ICON_MAP = {
   // Nav / UI
   ChevronRight,
   ChevronLeft,
+  ChevronDown,
+  ChevronUp,
   ArrowRight,
   GitBranch,
   GitMerge,
+  X,
+  SlidersHorizontal,
+  
+  // Stats
+  Bot,
+  Layers,
+  
+  // UI
+  Clock,
+  MousePointer2,
+  Grid,
+  LayoutGrid,
+  Tag,
+
+  // Detail Page
+  MessageSquareText,
+  Award,
+  Mail,
+  ExternalLink,
 };
 
 /**

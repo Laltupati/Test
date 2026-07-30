@@ -1,4 +1,5 @@
 import React from 'react';
+import { getPageUrl, isPlainLeftClick } from '../utils/navigation';
 
 const Header = ({ activePage, setActivePage }) => {
   return (
@@ -6,8 +7,8 @@ const Header = ({ activePage, setActivePage }) => {
       <div className="h-left">
         <a
           className="logo"
-          href="#"
-          onClick={(e) => { e.preventDefault(); setActivePage('categories'); }}
+          href={getPageUrl('categories')}
+          onClick={(e) => { if (isPlainLeftClick(e)) { e.preventDefault(); setActivePage('categories'); } }}
           title="Back to Home"
           style={{ cursor: 'pointer' }}
         >
@@ -21,32 +22,41 @@ const Header = ({ activePage, setActivePage }) => {
         </a>
         <div className="h-sep"></div>
         <nav className="page-tabs">
-          <button 
-            className={`page-tab ${activePage === 'usecases' ? 'active' : ''}`} 
-            onClick={() => setActivePage('usecases')}
+          <a
+            href={getPageUrl('usecases')}
+            className={`page-tab ${activePage === 'usecases' ? 'active' : ''}`}
+            onClick={(e) => { if (isPlainLeftClick(e)) { e.preventDefault(); setActivePage('usecases'); } }}
           >
           Use Cases
-          </button>
-          <button 
-            className={`page-tab ${activePage === 'aiagents' ? 'active' : ''}`} 
-            onClick={() => setActivePage('aiagents')}
+          </a>
+          <a
+            href={getPageUrl('aiagents')}
+            className={`page-tab ${activePage === 'aiagents' ? 'active' : ''}`}
+            onClick={(e) => { if (isPlainLeftClick(e)) { e.preventDefault(); setActivePage('aiagents'); } }}
           >
           Use Case 2
-          </button>
-          <button 
+          </a>
+          <span 
             className="page-tab page-tab-coming-soon"
-            disabled
             title="Coming Soon"
           >
             AI Agents
             <span className="coming-soon-badge">Coming Soon</span>
-          </button>
-          <button 
-            className={`page-tab ${activePage === 'admin' ? 'active' : ''}`} 
-            onClick={() => setActivePage('admin')}
+          </span>
+          <a
+            href={getPageUrl('usecase3')}
+            className={`page-tab ${activePage === 'usecase3' ? 'active' : ''}`}
+            onClick={(e) => { if (isPlainLeftClick(e)) { e.preventDefault(); setActivePage('usecase3'); } }}
           >
-          Admin Panel
-          </button>
+          Use Case 3
+          </a>
+          <span 
+            className="page-tab page-tab-coming-soon"
+            title="Coming Soon"
+          >
+            Admin Panel
+            <span className="coming-soon-badge">Coming Soon</span>
+          </span>
         </nav>
       </div>
     </header>
