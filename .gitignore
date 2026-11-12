@@ -1,0 +1,59 @@
+# Python runtime caches and interpreter-generated files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Local virtual environment folders
+.venv/
+venv/
+ENV/
+env/
+
+# Local configuration and secrets
+.env
+.env.local
+*.local
+config/*.local
+*.db
+gcp-key.json
+*.json.key
+
+# Chainlit runtime artifacts and temporary state
+.chainlit/.cache/
+.chainlit/*.db
+.chainlit/.session/
+
+# Editor and OS noise
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Build and packaging outputs
+dist/
+node_modules
+build/
+site/
+*.egg-info/
+pip-wheel-metadata/
+*.whl
+
+# Logs and report output
+*.log
+logs/
+report/
+coverage/
+htmlcov/
+
+# Generated documentation or temporary assets
+public/*.png
+public/*.svg
+public/*.ico
+temp/
+tmp/
+
+# Optional environment-specific ignores
+.secret*

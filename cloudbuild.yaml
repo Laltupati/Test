@@ -1,0 +1,59 @@
+substitutions:
+  _LOCATION: 'us-central1'
+  _TAG: 'latest'
+
+steps:
+  # 1. Build Single Container Image (Frontend + Backend)
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - '$_LOCATION-docker.pkg.dev/$PROJECT_ID/qualiverse-repo/qualiverse:${_TAG}'
+      - '.'
+
+  # 2. Push Image to Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - '$_LOCATION-docker.pkg.dev/$PROJECT_ID/qualiverse-repo/qualiverse:${_TAG}'
+
+  # 3. Deploy Application to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'qualiverse'
+      - '--image=$_LOCATION-docker.pkg.dev/$PROJECT_ID/qualiverse-repo/qualiverse:${_TAG}'
+      - '--region=$_LOCATION'
+      - '--platform=managed'
+      - '--allow-unauthenticated'
+      - '--set-env-vars=USE_FIRESTORE=true,GCP_PROJECT_ID=$PROJECT_ID,FIRESTORE_DATABASE=qualiverse-db,ENVIRONMENT=production'
+
+  # 4. Deploy Firestore Seed Job
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'jobs'
+      - 'deploy'
+      - 'qualiverse-seed'
+      - '--image=$_LOCATION-docker.pkg.dev/$PROJECT_ID/qualiverse-repo/qualiverse:${_TAG}'
+      - '--region=$_LOCATION'
+      - '--command=python'
+      - '--args=seed.py'
+      - '--set-env-vars=USE_FIRESTORE=true,GCP_PROJECT_ID=$PROJECT_ID,FIRESTORE_DATABASE=qualiverse-db'
+
+  # 5. Execute Firestore Seed Job
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'jobs'
+      - 'execute'
+      - 'qualiverse-seed'
+      - '--region=$_LOCATION'
+      - '--wait'
+
+images:
+  - '$_LOCATION-docker.pkg.dev/$PROJECT_ID/qualiverse-repo/qualiverse:${_TAG}'

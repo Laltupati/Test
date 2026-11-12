@@ -1,0 +1,34 @@
+name: Deploy to Google Cloud Platform
+
+on:
+  # push:
+  #   branches:
+  #     - main
+  workflow_dispatch: # Manual trigger only while GCP deployment is paused
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy:
+    name: Build & Deploy to GCP Cloud Run
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: adv-lighthouse-ai-qa-agent
+
+      - name: Submit Google Cloud Build Pipeline
+        run: |
+          gcloud builds submit --config cloudbuild.yaml --region=us-central1

@@ -1,0 +1,60 @@
+site_name: QualiVerse AI - Enterprise Documentation
+site_description: Complete documentation for QualiVerse AI enterprise AI solutions directory on Google Cloud Run & Firestore
+site_author: QualiVerse AI Team
+repo_url: https://github.com/kpmg-us/QualiVerse-AI
+site_url: https://kpmg-us.github.io/QualiVerse-AI/
+
+theme:
+  name: material
+  language: en
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: blue
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - attr_list
+
+nav:
+  - Overview: index.md
+  - Architecture: architecture.md
+  - Multi-Cloud Deployment Guide: multi-cloud-guide.md
+  - Azure Migration Guide: azure-migration.md
+  - Azure Migration Changes Checklist: azure-migration-changes.md
+  - GCP Cloud Run Deployment: gcp-deployment.md
+  - Local Setup & Scripts: local-setup.md
+  - API Reference: api-reference.md
+  - Firestore Database: firestore-schema.md
+  - Credentials & Security: credentials.md
