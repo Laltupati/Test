@@ -1,0 +1,164 @@
+# CI/CD pipeline for GenAI Playground.
+# The pipeline YAML remains in Azure Repos; it is deliberately excluded
+# from the App Service deployment package.
+trigger:
+  branches:
+    include:
+      - main
+
+pr:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  azureSubscription: 'genaiplayg-sc'
+  testWebAppName: 'genaiplaygtest'
+  prodWebAppName: 'ue-kgs-genaiplayground'
+  nodeVersion: '22.x'
+  artifactName: 'drop'
+  packageName: 'genaiplayground-app.zip'
+
+stages:
+- stage: Build
+  displayName: 'Build and package application'
+  jobs:
+  - job: Build
+    displayName: 'Build GenAI Playground'
+    steps:
+    - checkout: self
+      clean: true
+      persistCredentials: false
+
+    - task: NodeTool@0
+      displayName: 'Install Node.js $(nodeVersion)'
+      inputs:
+        versionSpec: '$(nodeVersion)'
+
+    - script: |
+        set -euo pipefail
+        cd client
+        # package.json contains the current MSAL dependencies, while the
+        # committed package-lock.json is missing @azure/msal-common@16.15.0.
+        # npm install reconciles package.json and package-lock.json before build.
+        npm install --no-audit --no-fund
+        npm run build
+      displayName: 'Install frontend dependencies and build React application'
+
+    - script: |
+        set -euo pipefail
+        cd server
+        npm ci
+      displayName: 'Install backend dependencies and validate lockfile'
+
+    # Stage only runtime application files. Do not deploy Git metadata,
+    # pipeline definitions, local environment files, or development modules.
+    - bash: |
+        set -euo pipefail
+        ROOT="$(Build.SourcesDirectory)"
+        STAGE="$(Build.ArtifactStagingDirectory)/app"
+        rm -rf "$STAGE"
+        mkdir -p "$STAGE"
+
+        # Preserve the app's existing directory layout because server/index.js
+        # serves the frontend from ../client/dist.
+        rsync -a \
+          --exclude='.git/' \
+          --exclude='.azure-pipelines/' \
+          --exclude='node_modules/' \
+          --exclude='.env' \
+          --exclude='.env.*' \
+          --exclude='azure-pipelines*.yml' \
+          --exclude='azure-pipelines*.yaml' \
+          --exclude='*.yml' \
+          --exclude='*.yaml' \
+          --exclude='README*' \
+          --exclude='.gitignore' \
+          "$ROOT/" "$STAGE/"
+
+        test -f "$STAGE/client/dist/index.html"
+        test -f "$STAGE/server/index.js"
+        test -f "$STAGE/package.json"
+
+        # Install only production backend dependencies in the deployment tree.
+        cd "$STAGE/server"
+        npm ci --omit=dev
+
+        # Guardrail: fail the build if any pipeline YAML entered the app package.
+        if find "$STAGE" -type f \( -name 'azure-pipelines*.yml' -o -name 'azure-pipelines*.yaml' \) | grep -q .; then
+          echo 'ERROR: Pipeline YAML unexpectedly included in deployment package.'
+          exit 1
+        fi
+      displayName: 'Stage clean App Service runtime package'
+
+    - task: ArchiveFiles@2
+      displayName: 'Create application-only deployment ZIP'
+      inputs:
+        rootFolderOrFile: '$(Build.ArtifactStagingDirectory)/app'
+        includeRootFolder: false
+        archiveType: 'zip'
+        archiveFile: '$(Build.ArtifactStagingDirectory)/$(packageName)'
+        replaceExistingArchive: true
+
+    - publish: '$(Build.ArtifactStagingDirectory)/$(packageName)'
+      artifact: '$(artifactName)'
+      displayName: 'Publish immutable deployment artifact'
+
+- stage: DeployTest
+  displayName: 'Deploy to Test'
+  dependsOn: Build
+  condition: succeeded()
+  jobs:
+  - deployment: DeployTest
+    displayName: 'Deploy to $(testWebAppName)'
+    pool:
+      vmImage: ubuntu-latest
+    environment: 'genaiplaygtest'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - download: current
+            artifact: '$(artifactName)'
+          - task: AzureRmWebAppDeployment@5
+            displayName: 'Deploy application ZIP to Test App Service'
+            inputs:
+              ConnectionType: 'AzureRM'
+              azureSubscription: '$(azureSubscription)'
+              appType: 'webAppLinux'
+              WebAppName: '$(testWebAppName)'
+              packageForLinux: '$(Pipeline.Workspace)/$(artifactName)/$(packageName)'
+              RuntimeStack: 'NODE|22-lts'
+              StartupCommand: 'npm start'
+              DeploymentTypeLinux: 'zipDeploy'
+
+- stage: DeployProduction
+  displayName: 'Deploy to Production'
+  dependsOn: DeployTest
+  condition: succeeded()
+  jobs:
+  - deployment: DeployProduction
+    displayName: 'Deploy to $(prodWebAppName)'
+    pool:
+      vmImage: ubuntu-latest
+    environment: 'ue-kgs-genaiplayground'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - download: current
+            artifact: '$(artifactName)'
+          - task: AzureRmWebAppDeployment@5
+            displayName: 'Deploy the same tested artifact to Production'
+            inputs:
+              ConnectionType: 'AzureRM'
+              azureSubscription: '$(azureSubscription)'
+              appType: 'webAppLinux'
+              WebAppName: '$(prodWebAppName)'
+              packageForLinux: '$(Pipeline.Workspace)/$(artifactName)/$(packageName)'
+              RuntimeStack: 'NODE|22-lts'
+              StartupCommand: 'npm start'
+              DeploymentTypeLinux: 'zipDeploy'

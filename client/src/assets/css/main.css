@@ -1,0 +1,31 @@
+/* ═══════════════════════════════════════════════════════════════════
+   CSS AGGREGATOR - Main Entry Point for All Stylesheets
+   Import order is critical for cascading and specificity
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* BASE: Variables, Reset, Foundation */
+@import './base/variables.css';
+@import './base/reset.css';
+@import './base/base.css';
+@import './base/typography.css';
+
+/* LAYOUT: Structure, Grid, Page Containers */
+@import './layout/header.css';
+@import './layout/pages.css';
+@import './layout/grid.css';
+
+/* COMPONENTS: UI Elements (cards, buttons, filters, etc.) */
+@import './components/banner.css';
+@import './components/cards.css';
+@import './components/filters.css';
+@import './components/buttons.css';
+@import './components/alerts.css';
+@import './components/tables.css';
+@import './components/badgets.css';
+
+/* UTILITIES: Helper classes, charts, tooltips, spacing */
+@import './utilities/utilities.css';
+
+/* PAGES: Page-specific stylesheets */
+@import './journey.css';
+@import './skeleton.css';

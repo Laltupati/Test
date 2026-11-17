@@ -1,0 +1,130 @@
+[
+  {
+    "id": "1790684195586-2y4zn3",
+    "timestamp": "2026-09-29T12:16:35.586Z",
+    "useCaseId": "pro-manager",
+    "solution": "Pro-Manager",
+    "level": "restricted",
+    "message": "App is reachable but access-restricted (HTTP 403) — likely App Service auth or an IP allowlist. Treated as up, not an outage."
+  },
+  {
+    "id": "1790684194406-vq23l4",
+    "timestamp": "2026-09-29T12:16:34.406Z",
+    "useCaseId": "synthdataforge",
+    "solution": "SynthDataForge",
+    "level": "restricted",
+    "message": "App is reachable but access-restricted (HTTP 403) — likely App Service auth or an IP allowlist. Treated as up, not an outage."
+  },
+  {
+    "id": "1790684193315-k50kk3",
+    "timestamp": "2026-09-29T12:16:33.315Z",
+    "useCaseId": "advisor-intelligence",
+    "solution": "Advisor Intelligence",
+    "level": "restricted",
+    "message": "App is reachable but access-restricted (HTTP 403) — likely App Service auth or an IP allowlist. Treated as up, not an outage."
+  },
+  {
+    "id": "1790684192220-ej5lhf",
+    "timestamp": "2026-09-29T12:16:32.220Z",
+    "useCaseId": "kpmg-agenda-creator",
+    "solution": "KPMG Agenda Creator",
+    "level": "restricted",
+    "message": "App is reachable but access-restricted (HTTP 403) — likely App Service auth or an IP allowlist. Treated as up, not an outage."
+  },
+  {
+    "id": "1790684191097-072pf3",
+    "timestamp": "2026-09-29T12:16:31.097Z",
+    "useCaseId": "augmented-insights-discovery",
+    "solution": "Augmented Insights and Discovery Engine",
+    "level": "restricted",
+    "message": "App is reachable but access-restricted (HTTP 403) — likely App Service auth or an IP allowlist. Treated as up, not an outage."
+  },
+  {
+    "id": "1790684190018-qf968k",
+    "timestamp": "2026-09-29T12:16:30.018Z",
+    "useCaseId": "resume-creator",
+    "solution": "Resume Creator",
+    "level": "restricted",
+    "message": "App is reachable but access-restricted (HTTP 403) — likely App Service auth or an IP allowlist. Treated as up, not an outage."
+  },
+  {
+    "id": "1790684189016-ulciy4",
+    "timestamp": "2026-09-29T12:16:29.016Z",
+    "useCaseId": "natural-language-data-querying",
+    "solution": "Reimagine AI Analyst",
+    "level": "restricted",
+    "message": "App is reachable but access-restricted (HTTP 403) — likely App Service auth or an IP allowlist. Treated as up, not an outage."
+  },
+  {
+    "id": "1790684187932-ockhkf",
+    "timestamp": "2026-09-29T12:16:27.932Z",
+    "useCaseId": "proscreener",
+    "solution": "Proscreener",
+    "level": "restricted",
+    "message": "App is reachable but access-restricted (HTTP 403) — likely App Service auth or an IP allowlist. Treated as up, not an outage."
+  },
+  {
+    "id": "1790683874231-1cz3jl",
+    "timestamp": "2026-09-29T12:11:14.231Z",
+    "useCaseId": "pro-manager",
+    "solution": "Pro-Manager",
+    "level": "restricted",
+    "message": "App is reachable but access-restricted (HTTP 403) — likely App Service auth or an IP allowlist. Treated as up, not an outage."
+  },
+  {
+    "id": "1790683873162-5pa122",
+    "timestamp": "2026-09-29T12:11:13.162Z",
+    "useCaseId": "synthdataforge",
+    "solution": "SynthDataForge",
+    "level": "restricted",
+    "message": "App is reachable but access-restricted (HTTP 403) — likely App Service auth or an IP allowlist. Treated as up, not an outage."
+  },
+  {
+    "id": "1790683872156-ws4og2",
+    "timestamp": "2026-09-29T12:11:12.156Z",
+    "useCaseId": "advisor-intelligence",
+    "solution": "Advisor Intelligence",
+    "level": "restricted",
+    "message": "App is reachable but access-restricted (HTTP 403) — likely App Service auth or an IP allowlist. Treated as up, not an outage."
+  },
+  {
+    "id": "1790683871016-8aycg3",
+    "timestamp": "2026-09-29T12:11:11.016Z",
+    "useCaseId": "kpmg-agenda-creator",
+    "solution": "KPMG Agenda Creator",
+    "level": "restricted",
+    "message": "App is reachable but access-restricted (HTTP 403) — likely App Service auth or an IP allowlist. Treated as up, not an outage."
+  },
+  {
+    "id": "1790683869950-s2zz4n",
+    "timestamp": "2026-09-29T12:11:09.950Z",
+    "useCaseId": "augmented-insights-discovery",
+    "solution": "Augmented Insights and Discovery Engine",
+    "level": "restricted",
+    "message": "App is reachable but access-restricted (HTTP 403) — likely App Service auth or an IP allowlist. Treated as up, not an outage."
+  },
+  {
+    "id": "1790683868809-phrho7",
+    "timestamp": "2026-09-29T12:11:08.809Z",
+    "useCaseId": "resume-creator",
+    "solution": "Resume Creator",
+    "level": "restricted",
+    "message": "App is reachable but access-restricted (HTTP 403) — likely App Service auth or an IP allowlist. Treated as up, not an outage."
+  },
+  {
+    "id": "1790683867781-xhpa31",
+    "timestamp": "2026-09-29T12:11:07.781Z",
+    "useCaseId": "natural-language-data-querying",
+    "solution": "Reimagine AI Analyst",
+    "level": "restricted",
+    "message": "App is reachable but access-restricted (HTTP 403) — likely App Service auth or an IP allowlist. Treated as up, not an outage."
+  },
+  {
+    "id": "1790683866719-ls9nih",
+    "timestamp": "2026-09-29T12:11:06.719Z",
+    "useCaseId": "proscreener",
+    "solution": "Proscreener",
+    "level": "restricted",
+    "message": "App is reachable but access-restricted (HTTP 403) — likely App Service auth or an IP allowlist. Treated as up, not an outage."
+  }
+]

@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌏</text></svg>" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KGS GenAI Playground</title>
+    <style>
+      .startup-screen {
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background: #f5f8fc;
+        color: #00338d;
+        font: 16px Arial, sans-serif;
+        text-align: center;
+      }
+      .startup-screen p { margin: 12px 0 0; }
+      .startup-indicator {
+        width: 30px;
+        height: 30px;
+        margin: 0 auto;
+        border: 3px solid #d5e5f7;
+        border-top-color: #0072ce;
+        border-radius: 50%;
+        animation: startup-spin 0.8s linear infinite;
+      }
+      @keyframes startup-spin { to { transform: rotate(360deg); } }
+      @media (prefers-reduced-motion: reduce) {
+        .startup-indicator { animation: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <div class="startup-screen" role="status" aria-live="polite">
+        <div>
+          <div class="startup-indicator" aria-hidden="true"></div>
+          <p>Loading GenAI Playground…</p>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

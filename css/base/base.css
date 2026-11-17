@@ -1,0 +1,68 @@
+/* ══════════════════════════════════════════════════════════════════
+   BASE STYLES & RESET
+   ═══════════════════════════════════════════════════════════════════ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font);
+  background: var(--surface-0);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── BACKGROUND DECORATIONS ── */
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(rgba(65, 120, 217, 0.09) 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  top: -200px;
+  left: -200px;
+  width: 650px;
+  height: 650px;
+  background: radial-gradient(circle, rgba(0, 51, 141, 0.38) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.glow-br {
+  position: fixed;
+  bottom: -130px;
+  right: -130px;
+  width: 520px;
+  height: 520px;
+  background: radial-gradient(circle, rgba(0, 81, 186, 0.14) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── SCROLLBAR STYLING ── */
+
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--surface-0);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}

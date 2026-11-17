@@ -1,0 +1,143 @@
+/* ══════════════════════════════════════════════════════════════════
+   HEADER & NAVIGATION — KPMG Blue theme
+   ═══════════════════════════════════════════════════════════════════ */
+
+header {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  background: #003087;
+  border-bottom: 2px solid #002060;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  padding: 0 40px;
+  justify-content: flex-start;
+}
+
+.h-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* ── KPMG LOGO ── */
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+
+.logo-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-sub-link {
+  display: inline-flex;
+  align-items: center;
+}
+
+.logo-svg {
+  height: 28px;
+  width: auto;
+  flex-shrink: 0;
+}
+
+.logo-rule {
+  width: 1px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.35);
+  flex-shrink: 0;
+}
+
+.logo-sub {
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: 0.07em;
+  text-transform: none;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.h-sep {
+  width: 1px;
+  height: 26px;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* ── PAGE TABS ── */
+
+.page-tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.page-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 18px;
+  border-radius: 5px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: var(--font);
+  color: rgba(255, 255, 255, 0.8);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.18s;
+  letter-spacing: 0.01em;
+}
+
+.page-tab:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.page-tab.active {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.18);
+  border-bottom: 2px solid #fff;
+}
+
+.page-tab .tab-lock {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+/* Coming Soon nav tab */
+.page-tab-coming-soon {
+  opacity: 0.6;
+  cursor: not-allowed !important;
+  position: relative;
+}
+.page-tab-coming-soon:hover {
+  background: none;
+  color: rgba(255, 255, 255, 0.6);
+}
+.coming-soon-badge {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: rgba(255,255,255,0.25);
+  color: #fff;
+  border-radius: 4px;
+  padding: 2px 5px;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
+/* ── RESPONSIVE ── */
+
+@media (max-width: 800px) {
+  header {
+    padding: 0 20px;
+  }
+}
