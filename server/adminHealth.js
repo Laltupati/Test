@@ -44,7 +44,7 @@ const AUTO_RESTART_COOLDOWN_MS = 60 * 60 * 1000;
 const ENABLE_AUTO_RESTART = process.env.ENABLE_AUTO_RESTART === 'true';
 const OWNER_NOTIFICATION_WEBHOOK_URL = process.env.OWNER_NOTIFICATION_WEBHOOK_URL || process.env.AZURE_NOTIFICATION_WEBHOOK_URL || '';
 const OWNER_NOTIFICATION_CC = process.env.OWNER_NOTIFICATION_CC || 'laltupati@kpmg.com';
-const LOG_MONITOR_INTERVAL_MS = Math.max(Number(process.env.LOG_MONITOR_INTERVAL_MS) || 60000, 60000);
+const LOG_MONITOR_INTERVAL_MS = Math.max(Number(process.env.LOG_MONITOR_INTERVAL_MS) || 30000, 30000);
 const RECOVERY_SUCCESS_CYCLES = Math.max(2, Number(process.env.HEALTH_RECOVERY_SUCCESS_CYCLES) || 2);
 // A transient probe failure must be observed in two separate health cycles
 // before an otherwise healthy application is changed to Unavailable. Confirmed
@@ -3541,6 +3541,11 @@ async function monitorApplicationLogsInternal(useCases, minutes = STATUS_LOG_WIN
             existing.status !== 'stopped' || mappedRuntimeRecoveryVerified
           )));
         const recoverySuccessCycles = availabilityHealthy ? Number(latch.recoverySuccessCycles || 0) + 1 : 0;
+        // A restarted App Service is no longer Stopped. While the clean-cycle
+        // threshold is still being satisfied, expose a neutral Checking state
+        // rather than reporting a new Unavailable outage.
+        const restartRecoveryInProgress = stoppedAppHasRestarted &&
+          availabilityHealthy && recoverySuccessCycles < RECOVERY_SUCCESS_CYCLES;
 
         if (availabilityHealthy && recoverySuccessCycles >= RECOVERY_SUCCESS_CYCLES) {
           clearPersistentLatch(useCase.id);
@@ -3589,14 +3594,18 @@ async function monitorApplicationLogsInternal(useCases, minutes = STATUS_LOG_WIN
             id: useCase.id,
             title: useCase.title,
             launchUrl: useCase.launchUrl,
-            status: (existing.status === 'stopped' && isLifecycleOnlyStoppedError(existing.lastError) && existing.statusSource !== 'recovery_validation')
-              ? 'stopped'
-              : 'inactive',
-            actionRequired: true,
+            status: restartRecoveryInProgress
+              ? 'checking'
+              : ((existing.status === 'stopped' && isLifecycleOnlyStoppedError(existing.lastError) && existing.statusSource !== 'recovery_validation')
+                ? 'stopped'
+                : 'inactive'),
+            actionRequired: restartRecoveryInProgress ? false : true,
             dependencyIncidentLatched: true,
             lastError: latch.lastError || existing.lastError || null,
-            errorSeverity: 'critical',
-            remediation: latch.remediation || existing.remediation || 'owner_alert',
+            errorSeverity: restartRecoveryInProgress ? null : 'critical',
+            remediation: restartRecoveryInProgress
+              ? 'Wait for recovery validation'
+              : (latch.remediation || existing.remediation || 'owner_alert'),
             dependencyHealth: latch.dependencyHealth || existing.dependencyHealth || {
               status: 'unhealthy',
               failingDependency: latch.lastError?.dependency || 'Application dependency',
@@ -3610,11 +3619,13 @@ async function monitorApplicationLogsInternal(useCases, minutes = STATUS_LOG_WIN
             recoverySuccessCycles,
             lastRecoveryCheckAt: new Date().toISOString(),
             statusSource: 'recovery_validation',
-            monitoringNote: platform403
-              ? `Monitoring note: Azure App Service access restrictions returned HTTP 403 to the monitoring worker. The application remains Unavailable while recovery is being validated; ${recoverySuccessCycles} of ${RECOVERY_SUCCESS_CYCLES} required consecutive successful Log Analytics checks have completed with no recent actionable or critical application/dependency errors.`
-              : (existing.status === 'stopped' && stoppedAppHasRestarted
-                ? `Monitoring note: Azure confirms the application has restarted and its health probe is successful. The previous incident is being cleared after ${recoverySuccessCycles} of ${RECOVERY_SUCCESS_CYCLES} consecutive clean recovery checks.`
-                : (existing.monitoringNote || null)),
+            monitoringNote: restartRecoveryInProgress
+              ? `Recovery validation in progress: Azure confirms the previously Stopped application has restarted. ${recoverySuccessCycles} of ${RECOVERY_SUCCESS_CYCLES} consecutive clean recovery checks completed. This Checking state is not a new outage and does not trigger another owner alert.`
+              : (platform403
+                ? `Monitoring note: Azure App Service access restrictions returned HTTP 403 to the monitoring worker. The application remains Unavailable while recovery is being validated; ${recoverySuccessCycles} of ${RECOVERY_SUCCESS_CYCLES} required consecutive successful Log Analytics checks have completed with no recent actionable or critical application/dependency errors.`
+                : (existing.status === 'stopped' && stoppedAppHasRestarted
+                  ? `Monitoring note: Azure confirms the application has restarted and its health probe is successful. The previous incident is being cleared after ${recoverySuccessCycles} of ${RECOVERY_SUCCESS_CYCLES} consecutive clean recovery checks.`
+                  : (existing.monitoringNote || null))),
           };
           persistDependencyLatch(useCase, retained);
           healthStore.set(useCase.id, retained);
