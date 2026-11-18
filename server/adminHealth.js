@@ -3541,13 +3541,15 @@ async function monitorApplicationLogsInternal(useCases, minutes = STATUS_LOG_WIN
             existing.status !== 'stopped' || mappedRuntimeRecoveryVerified
           )));
         const recoverySuccessCycles = availabilityHealthy ? Number(latch.recoverySuccessCycles || 0) + 1 : 0;
-        // A restarted App Service is no longer Stopped. While the clean-cycle
-        // threshold is still being satisfied, expose a neutral Checking state
-        // rather than reporting a new Unavailable outage.
-        const restartRecoveryInProgress = stoppedAppHasRestarted &&
-          availabilityHealthy && recoverySuccessCycles < RECOVERY_SUCCESS_CYCLES;
+        // Lifecycle recovery policy: once a previously Stopped application has
+        // fresh clean telemetry and ARM confirms every mapped runtime role is
+        // Running, recover it in this cycle. Generic application/dependency
+        // outages still require RECOVERY_SUCCESS_CYCLES consecutive clean cycles.
+        const recoveryThreshold = existing.status === 'stopped'
+          ? 1
+          : RECOVERY_SUCCESS_CYCLES;
 
-        if (availabilityHealthy && recoverySuccessCycles >= RECOVERY_SUCCESS_CYCLES) {
+        if (availabilityHealthy && recoverySuccessCycles >= recoveryThreshold) {
           clearPersistentLatch(useCase.id);
           clearOwnerNotification(useCase.id);
           const recovered = {
@@ -3586,7 +3588,7 @@ async function monitorApplicationLogsInternal(useCases, minutes = STATUS_LOG_WIN
             level: 'resolved',
             severity: 'info',
             actionRequired: false,
-            message: `Application automatically recovered after ${RECOVERY_SUCCESS_CYCLES} consecutive healthy availability/log cycles. Previous degraded dependency incident cleared.`,
+            message: `Application automatically recovered after ${recoveryThreshold} required healthy availability/log cycle(s). Previous incident cleared.`,
           });
         } else {
           const retained = {
@@ -3594,18 +3596,14 @@ async function monitorApplicationLogsInternal(useCases, minutes = STATUS_LOG_WIN
             id: useCase.id,
             title: useCase.title,
             launchUrl: useCase.launchUrl,
-            status: restartRecoveryInProgress
-              ? 'checking'
-              : ((existing.status === 'stopped' && isLifecycleOnlyStoppedError(existing.lastError) && existing.statusSource !== 'recovery_validation')
-                ? 'stopped'
-                : 'inactive'),
-            actionRequired: restartRecoveryInProgress ? false : true,
+            status: (existing.status === 'stopped' && isLifecycleOnlyStoppedError(existing.lastError))
+              ? 'stopped'
+              : 'inactive',
+            actionRequired: true,
             dependencyIncidentLatched: true,
             lastError: latch.lastError || existing.lastError || null,
-            errorSeverity: restartRecoveryInProgress ? null : 'critical',
-            remediation: restartRecoveryInProgress
-              ? 'Wait for recovery validation'
-              : (latch.remediation || existing.remediation || 'owner_alert'),
+            errorSeverity: 'critical',
+            remediation: latch.remediation || existing.remediation || 'owner_alert',
             dependencyHealth: latch.dependencyHealth || existing.dependencyHealth || {
               status: 'unhealthy',
               failingDependency: latch.lastError?.dependency || 'Application dependency',
@@ -3619,13 +3617,13 @@ async function monitorApplicationLogsInternal(useCases, minutes = STATUS_LOG_WIN
             recoverySuccessCycles,
             lastRecoveryCheckAt: new Date().toISOString(),
             statusSource: 'recovery_validation',
-            monitoringNote: restartRecoveryInProgress
-              ? `Recovery validation in progress: Azure confirms the previously Stopped application has restarted. ${recoverySuccessCycles} of ${RECOVERY_SUCCESS_CYCLES} consecutive clean recovery checks completed. This Checking state is not a new outage and does not trigger another owner alert.`
+            monitoringNote: existing.status === 'stopped'
+              ? (stoppedAppHasRestarted
+                ? `Azure confirms the previously Stopped application has restarted. Final recovery validation is completing; the lifecycle state remains Stopped until current telemetry/runtime evidence is sufficient to publish Available. No intermediate Unavailable state is emitted.`
+                : `The application remains Stopped until Azure confirms every required mapped App Service role is Running. No intermediate Unavailable state is emitted during a Stop/Start lifecycle transition.`)
               : (platform403
                 ? `Monitoring note: Azure App Service access restrictions returned HTTP 403 to the monitoring worker. The application remains Unavailable while recovery is being validated; ${recoverySuccessCycles} of ${RECOVERY_SUCCESS_CYCLES} required consecutive successful Log Analytics checks have completed with no recent actionable or critical application/dependency errors.`
-                : (existing.status === 'stopped' && stoppedAppHasRestarted
-                  ? `Monitoring note: Azure confirms the application has restarted and its health probe is successful. The previous incident is being cleared after ${recoverySuccessCycles} of ${RECOVERY_SUCCESS_CYCLES} consecutive clean recovery checks.`
-                  : (existing.monitoringNote || null))),
+                : (existing.monitoringNote || null)),
           };
           persistDependencyLatch(useCase, retained);
           healthStore.set(useCase.id, retained);
@@ -3874,7 +3872,7 @@ function getHealthSnapshot(useCases) {
         current.statusSource = current.statusSource || 'three_state_normalization';
       }
       const stoppedIsCurrentlySupported = current.status === 'stopped' &&
-        isLifecycleOnlyStoppedError(current.lastError) && current.statusSource !== 'recovery_validation';
+        isLifecycleOnlyStoppedError(current.lastError);
       if (current.status === 'stopped' && !stoppedIsCurrentlySupported) {
         current.status = 'inactive';
         current.statusSource = 'stale_stopped_state_normalized';
