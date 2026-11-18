@@ -1685,7 +1685,8 @@ async function resolveAzureAccessRestrictedProbe(useCase, result, current, autoF
 
   const latest = healthStore.get(useCase.id) || current || {};
   if (latest.status === 'active' &&
-      ['telemetry_and_configuration_recovery', 'telemetry_recovery'].includes(latest.statusSource) &&
+      ['telemetry_and_configuration_recovery', 'telemetry_recovery',
+       'runtime_and_telemetry_recovery'].includes(latest.statusSource) &&
       !getPersistentLatch(useCase.id)) {
     // The telemetry reconciler has already confirmed consecutive clean cycles.
     // Do not let this same blocked public probe overwrite that recovery result.
@@ -2165,10 +2166,11 @@ function scheduleApplicationLogMonitoring(useCase) {
 
 
 function canRecoverStoppedWithInconclusiveSettings({ current, probeResult, requiredSettings, telemetryCheck, runtimeEvidence, hasActiveIncident }) {
-  const probeIsUsable = probeResult?.ok === true ||
-    (probeResult?.authRestricted === true && probeResult?.accessRestrictedByAzure === true);
+  // During Azure Start, the public hostname can remain unreachable while ARM
+  // already reports every mapped App Service as Running. Runtime state plus a
+  // successful clean Log Analytics result are the lifecycle recovery authority;
+  // an external probe response is not required for Stopped -> Available.
   return current?.status === 'stopped' &&
-    probeIsUsable &&
     requiredSettings?.unknown === true &&
     telemetryCheck?.configured === true &&
     telemetryCheck?.querySucceeded === true &&
@@ -2528,7 +2530,6 @@ async function runCheckInternal(useCase) {
     // This does NOT prove the secret value is valid; the monitoring note keeps
     // that limitation visible and fresh LA auth/dependency errors still win.
     if (current.status === 'stopped' &&
-        (result.ok === true || (result.authRestricted === true && result.accessRestrictedByAzure === true)) &&
         useCase.allowRuntimeRecoveryWhenProbeBlocked === true) {
       let telemetryCheck = { configured: false, querySucceeded: false, apps: null, reason: 'Log Analytics verification not completed.' };
       let runtimeEvidence = { ok: false, reason: 'Mapped App Service runtime verification not completed.' };
@@ -2632,7 +2633,9 @@ async function runCheckInternal(useCase) {
       monitoringNote: requiredSettings.monitoringNote ||
         warnings.map((item) => item.message).join(' ') ||
         'Required application configuration could not be verified. The last confirmed application state is retained.',
-      statusSource: current.statusSource || 'configuration_verification_inconclusive',
+      statusSource: current.status === 'stopped'
+        ? 'stopped_recovery_validation'
+        : (current.statusSource || 'configuration_verification_inconclusive'),
     };
     healthStore.set(useCase.id, retained);
     return retained;
