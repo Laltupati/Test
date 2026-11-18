@@ -2726,7 +2726,62 @@ async function runCheckInternal(useCase) {
     return restrictedProbeHealthRecord(useCase, result, current, autoFixAttempts);
   }
 
-  // Do not let one short-lived 5xx/timeout/DNS event flicker an otherwise
+  // The root URL is not a declared functional health endpoint for mapped
+    // applications that explicitly allow telemetry recovery. A 503 from this
+    // monitor's GET / remains diagnostic-only when a fresh Log Analytics query
+    // contains no real application/dependency failure.
+    if (!result.ok && Number(result.statusCode) === 503 &&
+        useCase.allowTelemetryRecoveryWhenProbeBlocked === true) {
+      const telemetry = await monitorApplicationLogs([useCase], STATUS_LOG_WINDOW_MINUTES);
+      const rows = Array.isArray(telemetry?.apps?.[useCase.id]) ? telemetry.apps[useCase.id] : [];
+      const realActionable = rows.filter((row) =>
+        !isSyntheticRootProbe503(row) && !isLifecycleOnlyStoppedError(row) &&
+        (isActionableSeverity(row.Severity || row.Level) ||
+         isCriticalApplicationLog(row) || hasExplicitDependencyFailureSignal(row))
+      );
+      const latch = getPersistentLatch(useCase.id);
+      const genericLatch = latch &&
+        (isGenericHttpServiceIncident(latch) || isHttpAvailabilityLatch(latch, useCase));
+      if (telemetry?.querySucceeded === true && realActionable.length === 0 &&
+          (!latch || genericLatch)) {
+        clearPersistentLatch(useCase.id);
+        clearOwnerNotification(useCase.id);
+        pendingHighSeverityLogCycles.delete(useCase.id);
+        const current = healthStore.get(useCase.id) || prev || {};
+        const recovered = {
+          ...current,
+          id: useCase.id,
+          title: useCase.title,
+          launchUrl: useCase.launchUrl,
+          status: 'active',
+          lastChecked: new Date().toISOString(),
+          latencyMs: result.latencyMs ?? current.latencyMs ?? null,
+          statusCode: 503,
+          probeStatusCode: 503,
+          probeErrorType: result.errorType || 'http_error',
+          probeObservedAt: new Date().toISOString(),
+          consecutiveFailures: 0,
+          pendingProbeFailure: false,
+          lastError: null,
+          errorSeverity: null,
+          actionRequired: false,
+          remediation: null,
+          dependencyIncidentLatched: false,
+          dependencyHealth: null,
+          azureErrors: [],
+          recoverySuccessCycles: 0,
+          statusSource: 'synthetic_root_probe_ignored',
+          monitoringNote: 'The monitoring worker received HTTP 503 from GET /, but / is not a declared functional health endpoint for this mapped application. The synthetic Health Monitor row was excluded from incident evaluation, and the current Log Analytics reconciliation contained no real actionable application/dependency failure.',
+          owner: useCase.owner || current.owner || null,
+          ownerEmail: useCase.ownerEmail || current.ownerEmail || null,
+          lastNotification: null,
+        };
+        healthStore.set(useCase.id, recovered);
+        return recovered;
+      }
+    }
+
+    // Do not let one short-lived 5xx/timeout/DNS event flicker an otherwise
   // healthy application to Unavailable. Retry above, then require a second
   // scheduled health cycle unless current telemetry proves a critical failure.
   if (!result.ok && isTransientProbeFailure(result) && prev?.status === 'active') {
@@ -3063,6 +3118,13 @@ function isCriticalApplicationLog(error) {
 }
 
 
+function isSyntheticRootProbe503(error) {
+  const source = String(error?.Source || error?.source || '').trim().toLowerCase();
+  const message = String(error?.Message || error?.message || error?.errorMessage || '').trim();
+  return source === 'health monitor' &&
+    /live health probe received http 503:\s*503\s+get\s+\/?(?:\s|$)/i.test(message);
+}
+
 function isLifecycleOnlyStoppedError(error) {
   // Accept both normalized health records and raw Log Analytics rows. The
   // latter carry Message/Level/Source fields and may be labelled Error by the
@@ -3173,6 +3235,9 @@ async function monitorApplicationLogsInternal(useCases, minutes = STATUS_LOG_WIN
       // and to explicit connection/DNS failure signatures, not generic mentions
       // of Neo4j in informational application logs.
       const actionableErrors = errors.filter((e) =>
+        // The Health Monitor's own root GET / 503 is probe diagnostics, not
+        // application telemetry. Keep the row in Complete Logs but never latch it.
+        !isSyntheticRootProbe503(e) &&
         // A platform-generated stopped-app page is lifecycle evidence, not an
         // application/dependency incident. Exclude it before severity handling
         // so an Azure Error/Critical label cannot recreate a stale HTTP-service
@@ -3644,6 +3709,7 @@ async function investigateApplication(useCase) {
       ACTIONABLE_ERROR_FRESHNESS_MS
     );
     const currentActionable = errors.filter((e) => {
+      if (isSyntheticRootProbe503(e) || isLifecycleOnlyStoppedError(e)) return false;
       const advisorNeo4jFailure =
         useCase.id === 'advisor-intelligence' &&
         advisorNeo4jFailurePattern.test(String(e.Message || ''));
@@ -3805,6 +3871,9 @@ function getHealthSnapshot(useCases) {
         ? current.probeStatusCode
         : current.statusCode;
       const currentProbeStatus = currentProbeStatusValue == null ? NaN : Number(currentProbeStatusValue);
+      const syntheticRootProbeIgnored = current.status === 'active' &&
+        current.statusSource === 'synthetic_root_probe_ignored' &&
+        currentProbeStatus === 503 && current.dependencyIncidentLatched === false;
       // A platform-generated App Service access-restriction 403 is not an
       // application response: Azure blocks the monitoring worker before the
       // request reaches the site. resolveAzureAccessRestrictedProbe() has
@@ -3837,7 +3906,7 @@ function getHealthSnapshot(useCases) {
       }
       let latch = persistent[uc.id]?.active ? persistent[uc.id] : null;
       if (current.status === 'active' &&
-          current.statusSource === 'backend_runtime_telemetry_recovery' &&
+          ['backend_runtime_telemetry_recovery', 'synthetic_root_probe_ignored'].includes(current.statusSource) &&
           current.dependencyIncidentLatched === false &&
           latch && (isGenericHttpServiceIncident(latch) || isHttpAvailabilityLatch(latch, uc))) {
         clearPersistentLatch(uc.id);
@@ -3888,7 +3957,7 @@ function getHealthSnapshot(useCases) {
       const telemetryRecoveryInProgress =
         current.statusSource === 'recovery_validation' &&
         Number(current.recoverySuccessCycles || 0) > 0;
-      if (latch && !telemetryRecoveryInProgress &&
+      if (latch && !telemetryRecoveryInProgress && !syntheticRootProbeIgnored &&
           latchedHttpStatus >= 500 && latchedHttpStatus <= 599 &&
           current.status !== 'stopped') {
         const unavailable = {
