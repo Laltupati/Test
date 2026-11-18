@@ -2,6 +2,28 @@ const { getAccessToken } = require('./azureCredential');
 const WORKSPACE_ID = process.env.AZURE_LOG_ANALYTICS_WORKSPACE_ID;
 const DEFAULT_MINUTES = 60;
 const MAX_MINUTES = 31 * 24 * 60;
+
+// The health query unions several Azure Monitor tables and may legitimately
+// take longer than 15 seconds in a busy workspace. Keep the timeout adjustable
+// without a code deployment, while clamping invalid or extreme values.
+function boundedTimeout(value, fallback, minimum, maximum) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.min(Math.max(Math.trunc(parsed), minimum), maximum);
+}
+
+const LOG_ANALYTICS_QUERY_TIMEOUT_MS = boundedTimeout(
+  process.env.LOG_ANALYTICS_QUERY_TIMEOUT_MS,
+  45000,
+  15000,
+  120000,
+);
+const AZURE_MANAGEMENT_REQUEST_TIMEOUT_MS = boundedTimeout(
+  process.env.AZURE_MANAGEMENT_REQUEST_TIMEOUT_MS,
+  15000,
+  8000,
+  60000,
+);
 const KEYVAULT_REFERENCE_MONITORING = String(process.env.AZURE_KEYVAULT_REFERENCE_MONITORING || 'true').toLowerCase() !== 'false';
 const KEYVAULT_REFERENCE_CACHE_MS = Math.max(30000, Number(process.env.AZURE_KEYVAULT_REFERENCE_CACHE_MS || 120000));
 const keyVaultReferenceCache = new Map();
@@ -213,14 +235,14 @@ function keyVaultStatusSeverity(status) {
 async function getKeyVaultReferenceErrors(resourceIdOrIds) {
   const fetch = (url, options) => globalThis.fetch(url, {
     ...options,
-    signal: AbortSignal.timeout(8000),
+    signal: AbortSignal.timeout(AZURE_MANAGEMENT_REQUEST_TIMEOUT_MS),
   });
   if (!KEYVAULT_REFERENCE_MONITORING) return [];
   const ids = [...new Set(toResourceIdArray(resourceIdOrIds).map(v => String(v || '').replace(/\/+$/, '')).filter(v => /\/providers\/microsoft\.web\/sites\/[^/]+$/i.test(v)))];
   if (!ids.length) return [];
   const token = await awaitWithTimeout(
     getAccessToken('https://management.azure.com/.default'),
-    8000,
+    AZURE_MANAGEMENT_REQUEST_TIMEOUT_MS,
     'Azure management token acquisition',
   );
   if (!token?.token) return [];
@@ -294,7 +316,7 @@ async function getKeyVaultReferenceErrors(resourceIdOrIds) {
 async function query(kql, minutes, range = null) {
   const fetch = (url, options) => globalThis.fetch(url, {
     ...options,
-    signal: AbortSignal.timeout(15000),
+    signal: AbortSignal.timeout(LOG_ANALYTICS_QUERY_TIMEOUT_MS),
   });
   assertConfigured();
   const safeMinutes = Math.min(Math.max(Number(minutes) || DEFAULT_MINUTES, 1), MAX_MINUTES);
