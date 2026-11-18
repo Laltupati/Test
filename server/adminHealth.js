@@ -2423,6 +2423,90 @@ async function runCheckInternal(useCase) {
   if (requiredSettings?.unknown === true) {
     const current = healthStore.get(useCase.id) || prev || {};
 
+    // Resume Creator and similar mapped frontend/backend applications may not
+      // grant the monitoring identity App Settings-list permission. That ARM 403
+      // is a monitoring gap, not an outage. A fresh Azure Always On GET / -> 404
+      // from the mapped backend proves the backend process is accepting requests.
+      // If current telemetry contains that positive runtime evidence and no
+      // specific critical/dependency failure, clear only a generic HTTP-service
+      // 5xx latch. Do not clear named dependency, startup, auth, DNS, or config
+      // failures.
+      if (useCase.allowRuntimeRecoveryWhenProbeBlocked === true) {
+        try {
+          const runtimeTelemetry = await azureLogs.getErrorsForApplications(
+            [useCase],
+            STATUS_LOG_WINDOW_MINUTES,
+            100,
+          );
+          const rows = Array.isArray(runtimeTelemetry?.apps?.[useCase.id])
+            ? runtimeTelemetry.apps[useCase.id]
+            : [];
+          const freshBackendRuntime = rows.some((row) =>
+            isFreshBackendRuntimeEvidence(row, useCase)
+          );
+          const specificFailure = hasSpecificActionableFailure(rows, useCase);
+          const latch = getPersistentLatch(useCase.id);
+          const genericCurrentIncident = isGenericHttpServiceIncident(current) ||
+            isHttpAvailabilityLatch(current, useCase);
+          const genericPersistedIncident = !latch ||
+            isGenericHttpServiceIncident(latch) ||
+            isHttpAvailabilityLatch(latch, useCase);
+
+          if (freshBackendRuntime && !specificFailure &&
+              genericCurrentIncident && genericPersistedIncident) {
+            clearPersistentLatch(useCase.id);
+            clearOwnerNotification(useCase.id);
+            pendingHighSeverityLogCycles.delete(useCase.id);
+            const recovered = {
+              ...current,
+              id: useCase.id,
+              title: useCase.title,
+              launchUrl: useCase.launchUrl,
+              status: 'active',
+              lastChecked: new Date().toISOString(),
+              // Keep the external probe result diagnostic-only. It no longer
+              // represents the confirmed application state.
+              statusCode: result.statusCode ?? current.statusCode ?? null,
+              probeStatusCode: result.statusCode ?? current.probeStatusCode ?? null,
+              probeErrorType: result.errorType || current.probeErrorType || null,
+              consecutiveFailures: 0,
+              pendingProbeFailure: false,
+              lastError: null,
+              errorSeverity: null,
+              actionRequired: false,
+              remediation: null,
+              dependencyIncidentLatched: false,
+              dependencyHealth: null,
+              azureErrors: [],
+              recoverySuccessCycles: 0,
+              statusSource: 'backend_runtime_telemetry_recovery',
+              configurationValidation: {
+                status: 'inconclusive',
+                checkedAt: new Date().toISOString(),
+                requiredGroups: (useCase.requiredAppSettingGroups || []).map((group) => group.name || 'Required setting'),
+                warnings: requiredSettings.inspectionWarnings || [],
+              },
+              monitoringNote: `Application is Available. Fresh mapped-backend telemetry shows Azure Always On reached the running application process and GET / returned the expected 404 because the backend has no root route. No current specific critical application/dependency failure was found. Required App Service settings inspection remains inconclusive (${requiredSettings.monitoringNote || 'ARM access unavailable'}), and the external health probe result is retained for diagnostics only.`,
+              owner: useCase.owner || current.owner || null,
+              ownerEmail: useCase.ownerEmail || current.ownerEmail || null,
+              lastNotification: null,
+            };
+            healthStore.set(useCase.id, recovered);
+            logIncident({
+              useCaseId: useCase.id,
+              solution: useCase.title,
+              level: 'resolved',
+              severity: 'info',
+              actionRequired: false,
+              message: 'Generic HTTP-service incident cleared after fresh mapped-backend Always On telemetry proved runtime reachability and no specific actionable dependency/application failure was present.',
+            });
+            return recovered;
+          }
+        } catch (runtimeTelemetryError) {
+          console.warn(`[adminHealth] Backend runtime telemetry recovery could not be evaluated for ${useCase.id}: ${runtimeTelemetryError.message}`);
+        }
+      }
+
     // A settings-list ARM 403 must not strand an Azure-confirmed Stopped app
     // after it has been restarted. For this lifecycle-only transition, require
     // all mapped runtime roles to be Running, a successful public probe, a
@@ -2994,6 +3078,28 @@ function isGenericHttpServiceIncident(record) {
   const hasSpecificDependency = /neo4j|openai|key vault|database|redis|cosmos|sql|postgres|mysql|service bus|event hub|dns resolve|name or service not known|connection refused|authentication failed|invalid credential/i.test(combined);
   const genericHttp = /application http service|app_service|\bget \/\b|http service dependency/i.test(combined);
   return status >= 500 && status <= 599 && genericHttp && !hasSpecificDependency;
+}
+
+function isFreshBackendRuntimeEvidence(row, useCase, now = Date.now()) {
+  if (!row) return false;
+  const role = String(row.ResourceRole || row.resourceRole || '').toLowerCase();
+  if (role !== 'backend') return false;
+  const message = String(row.Message || row.message || '');
+  const timestamp = new Date(row.TimeGenerated || row.timeGenerated || 0).getTime();
+  if (!Number.isFinite(timestamp) || now - timestamp > Math.max(10 * 60 * 1000, ACTIONABLE_ERROR_FRESHNESS_MS)) return false;
+  // Azure Always On proves that the backend process accepted and answered the
+  // request. A backend API without a root route correctly returns 404 for GET /.
+  // This is runtime reachability evidence, not business-endpoint health.
+  return /(?:ua[=:\s]+alwayson|always on)/i.test(message) &&
+    /(?:get\s+\/.*(?:status=404|404\s+not found)|404\s+get\s+\/)/i.test(message);
+}
+
+function hasSpecificActionableFailure(rows = [], useCase = null) {
+  return rows.some((row) => {
+    if (isLifecycleOnlyStoppedError(row) || isFreshBackendRuntimeEvidence(row, useCase)) return false;
+    const severity = normalizeOperationalSeverity(row.Severity || row.Level);
+    return severity === 'critical' || isCriticalApplicationLog(row) || hasExplicitDependencyFailureSignal(row);
+  });
 }
 
 function isFreshActionableHealthLog(error, options = {}) {
@@ -3696,7 +3802,8 @@ function getHealthSnapshot(useCases) {
       const isConfirmedAzureAccessRestriction =
         currentProbeStatus === 403 &&
         (
-          ['azure_runtime_access_restricted', 'azure_access_restriction_unverified'].includes(current.statusSource) ||
+          ['azure_runtime_access_restricted', 'azure_access_restriction_unverified',
+           'backend_runtime_telemetry_recovery'].includes(current.statusSource) ||
           (['telemetry_and_configuration_recovery', 'telemetry_recovery', 'automatic_recovery'].includes(current.statusSource) &&
             current.probeAccessRestrictedByAzure === true)
         );
@@ -3714,7 +3821,15 @@ function getHealthSnapshot(useCases) {
         current.remediation = 'Restore application availability';
         current.monitoringNote = current.lastError.errorMessage;
       }
-      const latch = persistent[uc.id]?.active ? persistent[uc.id] : null;
+      let latch = persistent[uc.id]?.active ? persistent[uc.id] : null;
+      if (current.status === 'active' &&
+          current.statusSource === 'backend_runtime_telemetry_recovery' &&
+          current.dependencyIncidentLatched === false &&
+          latch && (isGenericHttpServiceIncident(latch) || isHttpAvailabilityLatch(latch, uc))) {
+        clearPersistentLatch(uc.id);
+        clearOwnerNotification(uc.id);
+        latch = null;
+      }
       const lastErrorStatus = isPrimaryAppServiceError(latch?.lastError, uc)
         ? Number(latch?.lastError?.statusCode)
         : 0;
