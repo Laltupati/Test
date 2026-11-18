@@ -3478,17 +3478,18 @@ async function monitorApplicationLogsInternal(useCases, minutes = STATUS_LOG_WIN
         // opt-in policy because those responses may represent a real outage.
         const telemetryRecoveryEnabled = platform403 ||
           (probeCannotReachApp && useCase.allowTelemetryRecoveryWhenProbeBlocked === true);
-        // Required settings must be positively inspected before recovery.
-        // An unknown settings result is a monitoring limitation, not proof of
-        // failure and not proof of health; retain the last confirmed state.
+        // App Settings inspection is monitoring coverage, not application
+        // availability. ARM HTTP 403 means unknown, not missing. Allow recovery
+        // when there is no positively confirmed missing-setting error, while
+        // retaining the warning in configurationValidation/monitoringNote.
         const recoverySettings = telemetryRecoveryEnabled
           ? await checkRequiredAppSettings(useCase)
           : { ok: true, unknown: false };
         const telemetryQuerySucceeded = result?.configured === true &&
           result?.apps && Object.prototype.hasOwnProperty.call(result.apps, useCase.id);
-        const requiredSettingsNotMissing =
-          (!Array.isArray(recoverySettings.errors) || recoverySettings.errors.length === 0) &&
-          recoverySettings.ok === true && recoverySettings.unknown !== true;
+        const confirmedMissingSettings = Array.isArray(recoverySettings.errors) &&
+          recoverySettings.errors.length > 0 && recoverySettings.unknown !== true;
+        const requiredSettingsNotMissing = !confirmedMissingSettings;
         const telemetryRecoveryHealthy = telemetryRecoveryEnabled &&
           telemetryQuerySucceeded &&
           requiredSettingsNotMissing;
@@ -3560,7 +3561,9 @@ async function monitorApplicationLogsInternal(useCases, minutes = STATUS_LOG_WIN
             azureErrors: [],
             recoverySuccessCycles: 0,
             statusSource: telemetryRecoveryHealthy
-              ? 'telemetry_and_configuration_recovery'
+              ? (recoverySettings.unknown === true
+                ? 'telemetry_recovery_configuration_unverified'
+                : 'telemetry_and_configuration_recovery')
               : 'automatic_recovery',
             monitoringNote: telemetryRecoveryHealthy
               ? `Monitoring note: Azure App Service access restrictions returned HTTP 403 to the monitoring worker. The application is Available based on ${RECOVERY_SUCCESS_CYCLES} consecutive successful Log Analytics checks with no recent actionable or critical application/dependency errors${useCase.requiredAppSettingGroups?.length && recoverySettings.unknown !== true ? ' and required backend settings present' : ''}.${recoverySettings.unknown === true ? ' Required settings could not be independently inspected because Azure configuration access was unavailable; no missing-setting failure was found in the queried telemetry.' : ''} The public URL could not be directly verified by this worker.`
@@ -3887,7 +3890,8 @@ function getHealthSnapshot(useCases) {
         (
           ['azure_runtime_access_restricted', 'azure_access_restriction_unverified',
            'backend_runtime_telemetry_recovery'].includes(current.statusSource) ||
-          (['telemetry_and_configuration_recovery', 'telemetry_recovery', 'automatic_recovery'].includes(current.statusSource) &&
+          (['telemetry_and_configuration_recovery', 'telemetry_recovery',
+             'telemetry_recovery_configuration_unverified', 'automatic_recovery'].includes(current.statusSource) &&
             current.probeAccessRestrictedByAzure === true)
         );
       if (current.status === 'active' && [401, 403].includes(currentProbeStatus) &&
