@@ -2441,10 +2441,24 @@ async function runCheckInternal(useCase) {
           const rows = Array.isArray(runtimeTelemetry?.apps?.[useCase.id])
             ? runtimeTelemetry.apps[useCase.id]
             : [];
-          const freshBackendRuntime = rows.some((row) =>
+          const backendRuntimeRows = rows.filter((row) =>
             isFreshBackendRuntimeEvidence(row, useCase)
           );
-          const specificFailure = hasSpecificActionableFailure(rows, useCase);
+          const latestBackendRuntimeAt = backendRuntimeRows.reduce((latestAt, row) => {
+            const at = new Date(row.TimeGenerated || row.timeGenerated || 0).getTime();
+            return Number.isFinite(at) ? Math.max(latestAt, at) : latestAt;
+          }, 0);
+          const freshBackendRuntime = latestBackendRuntimeAt > 0;
+          // Historical generic 503 rows must not outrank later positive backend
+          // runtime proof. Only a specific critical/dependency failure newer than
+          // the latest Always On response blocks recovery.
+          const failuresAfterRuntime = freshBackendRuntime
+            ? rows.filter((row) => {
+                const at = new Date(row.TimeGenerated || row.timeGenerated || 0).getTime();
+                return Number.isFinite(at) && at > latestBackendRuntimeAt;
+              })
+            : rows;
+          const specificFailure = hasSpecificActionableFailure(failuresAfterRuntime, useCase);
           const latch = getPersistentLatch(useCase.id);
           const genericCurrentIncident = isGenericHttpServiceIncident(current) ||
             isHttpAvailabilityLatch(current, useCase);
@@ -2453,7 +2467,7 @@ async function runCheckInternal(useCase) {
             isHttpAvailabilityLatch(latch, useCase);
 
           if (freshBackendRuntime && !specificFailure &&
-              genericCurrentIncident && genericPersistedIncident) {
+              (genericCurrentIncident || Boolean(latch)) && genericPersistedIncident) {
             clearPersistentLatch(useCase.id);
             clearOwnerNotification(useCase.id);
             pendingHighSeverityLogCycles.delete(useCase.id);
