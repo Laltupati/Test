@@ -1728,6 +1728,66 @@ async function resolveAzureAccessRestrictedProbe(useCase, result, current, autoF
     ) &&
     Number.isFinite(latestErrorAt) && latestErrorAt > 0 &&
     Date.now() - latestErrorAt <= freshnessWindowMs;
+  // For an application with an explicit frontend/backend runtime contract, a
+  // generic HTTP-service 5xx can be emitted by the restricted monitoring path
+  // even while both App Services are running. Historically this monitor worked
+  // without App Settings-list permission, so a settings ARM 403 is treated as
+  // monitoring coverage limitation, not application downtime. Never suppress
+  // named dependency, startup, credential, DNS, or authentication failures.
+  const genericHttpOnlyIncident =
+    isGenericHttpServiceIncident(latest) &&
+    (!persistentLatch || isGenericHttpServiceIncident(persistentLatch));
+  let runtimeVerifiedDespiteMonitoring403 = false;
+  if (result.accessRestrictedByAzure === true &&
+      useCase.allowRuntimeRecoveryWhenProbeBlocked === true &&
+      requiredSettings?.unknown === true &&
+      telemetryVerifiedForApp &&
+      genericHttpOnlyIncident &&
+      !hasFreshDependencyError &&
+      Array.isArray(useCase.recoveryRuntimeRoles) &&
+      useCase.recoveryRuntimeRoles.length > 0) {
+    try {
+      const runtimeEvidence = await getMappedAppServiceRuntimeEvidence(useCase, useCase.recoveryRuntimeRoles);
+      runtimeVerifiedDespiteMonitoring403 = runtimeEvidence.ok === true;
+    } catch (runtimeError) {
+      console.warn(`[adminHealth] Runtime verification failed for ${useCase.id}: ${runtimeError.message}`);
+    }
+  }
+  if (runtimeVerifiedDespiteMonitoring403) {
+    clearPersistentLatch(useCase.id);
+    clearOwnerNotification(useCase.id);
+    const recovered = {
+      ...latest,
+      id: useCase.id,
+      title: useCase.title,
+      launchUrl: useCase.launchUrl,
+      status: 'active',
+      statusCode: result.statusCode || 403,
+      probeStatusCode: result.statusCode || 403,
+      probeAccessRestrictedByAzure: true,
+      lastChecked: new Date().toISOString(),
+      consecutiveFailures: 0,
+      lastError: null,
+      errorSeverity: null,
+      actionRequired: false,
+      dependencyIncidentLatched: false,
+      remediation: 'none',
+      dependencyHealth: null,
+      azureErrors: [],
+      recoverySuccessCycles: 0,
+      statusSource: 'runtime_recovery_monitoring_limited',
+      configurationValidation: {
+        status: 'inconclusive',
+        requiredSettingsVerified: false,
+        warnings: requiredSettings.inspectionWarnings || [],
+      },
+      monitoringNote: `Azure Resource Manager confirms all mapped App Services are Running. The public monitoring probe is access-restricted and App Service settings inspection is unavailable (${requiredSettings.monitoringNote || 'ARM HTTP 403'}). The generic HTTP-service 5xx from the monitoring path was not treated as application downtime; named dependency and critical application errors remain authoritative.`,
+      lastNotification: null,
+    };
+    healthStore.set(useCase.id, recovered);
+    return recovered;
+  }
+
   // A blocked public probe must never clear a confirmed dependency incident.
   // Check both the in-memory health record and the persisted incident latch:
   // the latter survives worker restarts and protects against concurrent probes.
@@ -2739,31 +2799,19 @@ async function runCheckInternal(useCase) {
     return retained;
   }
 
-  // A retry may have surfaced the Azure stopped page where the first attempt
-  // saw a transient failure. The splash page is only a hint: mapped applications
-  // must be corroborated with current ARM state before publishing Stopped.
+  // A retry may have surfaced the Azure stopped page. Corroborate mapped
+  // applications with current ARM state before publishing Stopped.
   if (result.appStopped && Array.isArray(useCase.recoveryRuntimeRoles) && useCase.recoveryRuntimeRoles.length) {
-    let mappedRuntime = { states: [], reason: 'Mapped App Service runtime was not checked after retry.' };
-    try {
-      mappedRuntime = await getMappedAppServiceRuntimeEvidence(useCase, useCase.recoveryRuntimeRoles);
-    } catch (err) {
-      mappedRuntime = { states: [], reason: err.message };
-    }
-    const stoppedProbeDecision = reconcileStoppedProbeAgainstMappedRuntime(mappedRuntime, useCase.recoveryRuntimeRoles);
-    if (stoppedProbeDecision.classification !== 'stopped') {
-      result = {
-        ...result,
-        appStopped: false,
-        authRestricted: true,
-        accessRestrictedByAzure: true,
-        errorType: 'access_restricted_probe',
-        errorMessage: stoppedProbeDecision.classification === 'running'
-          ? 'The retry returned an Azure stopped-app 403 page, but ARM confirms every mapped App Service role is Running.'
-          : `The retry returned a stopped-app 403 page, but mapped App Service runtime could not be conclusively verified: ${stoppedProbeDecision.reason}`,
-        runtimeReconciliation: stoppedProbeDecision.classification,
-      };
-    } else {
-      result = { ...result, errorMessage: `Azure Resource Manager confirms a mapped App Service is stopped: ${stoppedProbeDecision.reason}` };
+    let mappedRuntime = { states: [], reason: 'Runtime not checked after retry.' };
+    try { mappedRuntime = await getMappedAppServiceRuntimeEvidence(useCase, useCase.recoveryRuntimeRoles); }
+    catch (err) { mappedRuntime = { states: [], reason: err.message }; }
+    const decision = reconcileStoppedProbeAgainstMappedRuntime(mappedRuntime, useCase.recoveryRuntimeRoles);
+    if (decision.classification !== 'stopped') {
+      result = { ...result, appStopped: false, authRestricted: true, accessRestrictedByAzure: true,
+        errorType: 'access_restricted_probe', runtimeReconciliation: decision.classification,
+        errorMessage: decision.classification === 'running'
+          ? 'The retry returned an Azure stopped-app page, but ARM confirms every mapped App Service role is Running.'
+          : `Stopped-page response was not corroborated by ARM: ${decision.reason}` };
     }
   }
   if (result.appStopped) {
@@ -2929,6 +2977,23 @@ function isLifecycleOnlyStoppedError(error) {
   ).toLowerCase();
   return type === 'app_stopped' ||
     /azure app service (?:is )?stopped|app service state:\s*stopped|azure app service stopped \(http 503\)/i.test(message);
+}
+
+function isGenericHttpServiceIncident(record) {
+  if (!record) return false;
+  const error = record.lastError || record;
+  const combined = [
+    error.errorMessage,
+    error.Message,
+    record.dependencyHealth?.failingDependency,
+    record.dependencyHealth?.category,
+    ...(Array.isArray(record.azureErrors) ? record.azureErrors.map(item => item?.Message) : []),
+  ].filter(Boolean).join(' ').toLowerCase();
+  const status = Number(error.statusCode || record.statusCode ||
+    String(combined).match(/\b(?:http\s*)?(5\d\d)\b/i)?.[1]);
+  const hasSpecificDependency = /neo4j|openai|key vault|database|redis|cosmos|sql|postgres|mysql|service bus|event hub|dns resolve|name or service not known|connection refused|authentication failed|invalid credential/i.test(combined);
+  const genericHttp = /application http service|app_service|\bget \/\b|http service dependency/i.test(combined);
+  return status >= 500 && status <= 599 && genericHttp && !hasSpecificDependency;
 }
 
 function isFreshActionableHealthLog(error, options = {}) {
@@ -3331,18 +3396,14 @@ async function monitorApplicationLogsInternal(useCases, minutes = STATUS_LOG_WIN
             message: `Application automatically recovered after ${RECOVERY_SUCCESS_CYCLES} consecutive healthy availability/log cycles. Previous degraded dependency incident cleared.`,
           });
         } else {
-          // Stopped is reserved for current Azure lifecycle evidence. Historical
-          // HTTP 5xx or dependency incidents remain Unavailable while recovery
-          // validation is incomplete.
-          const retainStopped = existing.status === 'stopped' &&
-            isLifecycleOnlyStoppedError(existing.lastError) &&
-            existing.statusSource !== 'recovery_validation';
           const retained = {
             ...existing,
             id: useCase.id,
             title: useCase.title,
             launchUrl: useCase.launchUrl,
-            status: retainStopped ? 'stopped' : 'inactive',
+            status: (existing.status === 'stopped' && isLifecycleOnlyStoppedError(existing.lastError) && existing.statusSource !== 'recovery_validation')
+              ? 'stopped'
+              : 'inactive',
             actionRequired: true,
             dependencyIncidentLatched: true,
             lastError: latch.lastError || existing.lastError || null,
@@ -3364,10 +3425,8 @@ async function monitorApplicationLogsInternal(useCases, minutes = STATUS_LOG_WIN
             monitoringNote: platform403
               ? `Monitoring note: Azure App Service access restrictions returned HTTP 403 to the monitoring worker. The application remains Unavailable while recovery is being validated; ${recoverySuccessCycles} of ${RECOVERY_SUCCESS_CYCLES} required consecutive successful Log Analytics checks have completed with no recent actionable or critical application/dependency errors.`
               : (existing.status === 'stopped' && stoppedAppHasRestarted
-                ? `Monitoring note: Azure confirms the application has restarted. The previous incident is being cleared after ${recoverySuccessCycles} of ${RECOVERY_SUCCESS_CYCLES} consecutive clean recovery checks; until then it is shown as Unavailable, not Stopped / Down.`
-                : (!retainStopped && existing.status === 'stopped'
-                  ? 'Historical Stopped state normalized to Unavailable because the current evidence is not an Azure-confirmed stopped App Service. Recovery validation is still in progress.'
-                  : (existing.monitoringNote || null))),
+                ? `Monitoring note: Azure confirms the application has restarted and its health probe is successful. The previous incident is being cleared after ${recoverySuccessCycles} of ${RECOVERY_SUCCESS_CYCLES} consecutive clean recovery checks.`
+                : (existing.monitoringNote || null)),
           };
           persistDependencyLatch(useCase, retained);
           healthStore.set(useCase.id, retained);
@@ -3614,18 +3673,13 @@ function getHealthSnapshot(useCases) {
         current.status = 'inactive';
         current.statusSource = current.statusSource || 'three_state_normalization';
       }
-      // Defensive migration for stale records written by older builds. Do not
-      // expose Stopped / Down without current lifecycle-only stopped evidence.
       const stoppedIsCurrentlySupported = current.status === 'stopped' &&
-        isLifecycleOnlyStoppedError(current.lastError) &&
-        current.statusSource !== 'recovery_validation';
+        isLifecycleOnlyStoppedError(current.lastError) && current.statusSource !== 'recovery_validation';
       if (current.status === 'stopped' && !stoppedIsCurrentlySupported) {
         current.status = 'inactive';
         current.statusSource = 'stale_stopped_state_normalized';
         current.actionRequired = true;
-        current.errorSeverity = current.errorSeverity || 'critical';
-        current.remediation = current.remediation || 'Validate application recovery';
-        current.monitoringNote = 'A historical Stopped state was found, but the current record does not contain Azure-confirmed stopped runtime evidence. The application is shown as Unavailable until current runtime, telemetry, and configuration recovery checks complete.';
+        current.monitoringNote = 'Historical Stopped state normalized to Unavailable because current ARM-correlated stopped evidence is absent.';
       }
       const currentProbeStatusValue = Object.prototype.hasOwnProperty.call(current, 'probeStatusCode')
         ? current.probeStatusCode

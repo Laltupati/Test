@@ -2,28 +2,12 @@ const { getAccessToken } = require('./azureCredential');
 const WORKSPACE_ID = process.env.AZURE_LOG_ANALYTICS_WORKSPACE_ID;
 const DEFAULT_MINUTES = 60;
 const MAX_MINUTES = 31 * 24 * 60;
-
-// The health query unions several Azure Monitor tables and may legitimately
-// take longer than 15 seconds in a busy workspace. Keep the timeout adjustable
-// without a code deployment, while clamping invalid or extreme values.
 function boundedTimeout(value, fallback, minimum, maximum) {
   const parsed = Number(value);
-  if (!Number.isFinite(parsed)) return fallback;
-  return Math.min(Math.max(Math.trunc(parsed), minimum), maximum);
+  return Number.isFinite(parsed) ? Math.min(Math.max(Math.trunc(parsed), minimum), maximum) : fallback;
 }
-
-const LOG_ANALYTICS_QUERY_TIMEOUT_MS = boundedTimeout(
-  process.env.LOG_ANALYTICS_QUERY_TIMEOUT_MS,
-  45000,
-  15000,
-  120000,
-);
-const AZURE_MANAGEMENT_REQUEST_TIMEOUT_MS = boundedTimeout(
-  process.env.AZURE_MANAGEMENT_REQUEST_TIMEOUT_MS,
-  15000,
-  8000,
-  60000,
-);
+const LOG_ANALYTICS_QUERY_TIMEOUT_MS = boundedTimeout(process.env.LOG_ANALYTICS_QUERY_TIMEOUT_MS, 45000, 15000, 120000);
+const AZURE_MANAGEMENT_REQUEST_TIMEOUT_MS = boundedTimeout(process.env.AZURE_MANAGEMENT_REQUEST_TIMEOUT_MS, 15000, 8000, 60000);
 const KEYVAULT_REFERENCE_MONITORING = String(process.env.AZURE_KEYVAULT_REFERENCE_MONITORING || 'true').toLowerCase() !== 'false';
 const KEYVAULT_REFERENCE_CACHE_MS = Math.max(30000, Number(process.env.AZURE_KEYVAULT_REFERENCE_CACHE_MS || 120000));
 const keyVaultReferenceCache = new Map();
