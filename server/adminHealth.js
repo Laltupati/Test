@@ -1364,6 +1364,14 @@ async function notifyOwner(useCase, record, options = {}) {
 async function notifyRecoveryOwner(useCase, record) {
   const transition = record?.recoveryTransition;
   if (!useCase?.ownerEmail || !transition?.key) return record;
+  // Recovery notifications are asynchronous. Re-read the durable health state
+  // before sending so a later Azure lifecycle transition (especially Stopped)
+  // always wins over an older queued inactive -> active recovery event.
+  const durableBeforeRecoveryNotice = readHealthRecord(useCase.id) || healthStore.get(useCase.id) || record;
+  if (String(durableBeforeRecoveryNotice?.status || '').toLowerCase() !== 'active' ||
+      durableBeforeRecoveryNotice?.recoveryTransition?.key !== transition.key) {
+    return durableBeforeRecoveryNotice;
+  }
   const saved = readRecoveryNotification(useCase.id);
   if (saved?.eventKey === transition.key && saved?.sent === true) return record;
   if (saved?.eventKey === transition.key && Number(saved?.nextRetryAt || 0) > Date.now()) return record;
@@ -1375,6 +1383,11 @@ async function notifyRecoveryOwner(useCase, record) {
     if (latest?.eventKey === transition.key && latest?.sent === true) return record;
     if (latest?.eventKey === transition.key && Number(latest?.nextRetryAt || 0) > Date.now()) return record;
 
+    const durableBeforeSend = readHealthRecord(useCase.id) || healthStore.get(useCase.id) || record;
+    if (String(durableBeforeSend?.status || '').toLowerCase() !== 'active' ||
+        durableBeforeSend?.recoveryTransition?.key !== transition.key) {
+      return durableBeforeSend;
+    }
     const attemptAt = new Date().toISOString();
     const result = await notifyOwner(useCase, {
       ...record,
@@ -1419,6 +1432,16 @@ async function notifyRecoveryOwner(useCase, record) {
 
 async function maybeNotifyOwner(useCase, record, previousRecord) {
   if (!useCase.ownerEmail) return record;
+  // Azure lifecycle Stopped has absolute notification precedence. Telemetry can
+  // continue to be stored while stopped, but it must not generate Unavailable
+  // or Available/Recovered notification churn until a fresh health cycle moves
+  // the durable state out of Stopped.
+  const durableNotificationState = readHealthRecord(useCase.id) || healthStore.get(useCase.id) || previousRecord;
+  if (String(durableNotificationState?.status || '').toLowerCase() === 'stopped' &&
+      String(record?.status || '').toLowerCase() !== 'stopped') {
+    record.lastNotification = readOwnerNotification(useCase.id) || durableNotificationState?.lastNotification || record.lastNotification || null;
+    return record;
+  }
 
   // Never email an owner for a one-cycle transient probe failure. This guard
   // is deliberately at the notification boundary because several independent
@@ -3408,10 +3431,24 @@ async function monitorApplicationLogsInternal(useCases, minutes = STATUS_LOG_WIN
           lastRecoveryCheckAt: new Date().toISOString(),
         };
 
-        // Persist BEFORE publishing to healthStore so a simultaneous URL probe
-        // cannot legitimately conclude "Healthy" from endpoint availability.
-        persistDependencyLatch(useCase, record);
-        healthStore.set(useCase.id, record);
+        // Stopped is lifecycle-authoritative. While ARM/probe reconciliation has
+        // the application in Stopped, telemetry is diagnostic only: never create
+        // a dependency latch that can later emit Active/Inactive notifications.
+        // Preserve the Stopped record and attach fresh telemetry for the UI/logs.
+        if (current.status === 'stopped') {
+          const stoppedRecord = {
+            ...current,
+            azureErrors: confirmedActionableErrors.slice(0, 25),
+            telemetryObservedAt: new Date().toISOString(),
+            lastRecoveryCheckAt: new Date().toISOString(),
+          };
+          healthStore.set(useCase.id, stoppedRecord);
+        } else {
+          // Persist BEFORE publishing to healthStore so a simultaneous URL probe
+          // cannot legitimately conclude "Healthy" from endpoint availability.
+          persistDependencyLatch(useCase, record);
+          healthStore.set(useCase.id, record);
+        }
 
         // Process only genuinely new rows for incident history / notification.
         // Seen rows still enforce the appropriate health state on every poll.
@@ -3437,9 +3474,12 @@ async function monitorApplicationLogsInternal(useCases, minutes = STATUS_LOG_WIN
           });
         }
 
-        // Notification dedupe is handled inside maybeNotifyOwner. Calling it
-        // after reconciliation keeps state and alerting independent.
-        await maybeNotifyOwner(useCase, record, current);
+        // Notification dedupe is handled inside maybeNotifyOwner. Stopped has
+        // absolute lifecycle precedence, so telemetry cannot send Unavailable
+        // notifications until the application leaves Stopped.
+        if (current.status !== 'stopped') {
+          await maybeNotifyOwner(useCase, record, current);
+        }
       } else if (persistentLatch || (['degraded', 'inactive', 'stopped'].includes(existing.status) && existing.dependencyIncidentLatched)) {
         // Automatic recovery: a historical incident must not keep an application
         // Unavailable forever. Include Stopped here because an app may have had
