@@ -1364,13 +1364,14 @@ async function notifyOwner(useCase, record, options = {}) {
 async function notifyRecoveryOwner(useCase, record) {
   const transition = record?.recoveryTransition;
   if (!useCase?.ownerEmail || !transition?.key) return record;
-  // Recovery notifications are asynchronous. Re-read the durable health state
-  // before sending so a later Azure lifecycle transition (especially Stopped)
-  // always wins over an older queued inactive -> active recovery event.
-  const durableBeforeRecoveryNotice = readHealthRecord(useCase.id) || healthStore.get(useCase.id) || record;
-  if (String(durableBeforeRecoveryNotice?.status || '').toLowerCase() !== 'active' ||
-      durableBeforeRecoveryNotice?.recoveryTransition?.key !== transition.key) {
-    return durableBeforeRecoveryNotice;
+
+  // Recovery email is consequential and may race with a Stop operation. The
+  // persisted record can still be Active for a few milliseconds before the
+  // stopped health cycle wins. Re-check the CURRENT Azure App Service lifecycle
+  // immediately before processing any Available/RECOVERED notification.
+  const recoveryRuntime = await getAzureAppServiceRuntimeState(useCase);
+  if (recoveryRuntime?.available && ['stopped', 'stopping'].includes(String(recoveryRuntime.state || '').toLowerCase())) {
+    return healthStore.get(useCase.id) || record;
   }
   const saved = readRecoveryNotification(useCase.id);
   if (saved?.eventKey === transition.key && saved?.sent === true) return record;
@@ -1383,10 +1384,13 @@ async function notifyRecoveryOwner(useCase, record) {
     if (latest?.eventKey === transition.key && latest?.sent === true) return record;
     if (latest?.eventKey === transition.key && Number(latest?.nextRetryAt || 0) > Date.now()) return record;
 
-    const durableBeforeSend = readHealthRecord(useCase.id) || healthStore.get(useCase.id) || record;
-    if (String(durableBeforeSend?.status || '').toLowerCase() !== 'active' ||
-        durableBeforeSend?.recoveryTransition?.key !== transition.key) {
-      return durableBeforeSend;
+    // Close the remaining race window under the cross-worker notification
+    // lock. If Azure changed to Stopped after this recovery job was queued, the
+    // RECOVERED message is cancelled even if an older Active record still exists.
+    const recoveryRuntimeBeforeSend = await getAzureAppServiceRuntimeState(useCase);
+    if (recoveryRuntimeBeforeSend?.available &&
+        ['stopped', 'stopping'].includes(String(recoveryRuntimeBeforeSend.state || '').toLowerCase())) {
+      return healthStore.get(useCase.id) || record;
     }
     const attemptAt = new Date().toISOString();
     const result = await notifyOwner(useCase, {
@@ -1432,15 +1436,17 @@ async function notifyRecoveryOwner(useCase, record) {
 
 async function maybeNotifyOwner(useCase, record, previousRecord) {
   if (!useCase.ownerEmail) return record;
-  // Azure lifecycle Stopped has absolute notification precedence. Telemetry can
-  // continue to be stored while stopped, but it must not generate Unavailable
-  // or Available/Recovered notification churn until a fresh health cycle moves
-  // the durable state out of Stopped.
-  const durableNotificationState = readHealthRecord(useCase.id) || healthStore.get(useCase.id) || previousRecord;
-  if (String(durableNotificationState?.status || '').toLowerCase() === 'stopped' &&
-      String(record?.status || '').toLowerCase() !== 'stopped') {
-    record.lastNotification = readOwnerNotification(useCase.id) || durableNotificationState?.lastNotification || record.lastNotification || null;
-    return record;
+
+  // Stopped has absolute notification precedence. Before sending any non-Stopped
+  // outage notification, consult Azure directly rather than trusting an in-memory
+  // telemetry record that may be racing with the lifecycle monitor.
+  if (String(record?.status || '').toLowerCase() !== 'stopped') {
+    const notificationRuntime = await getAzureAppServiceRuntimeState(useCase);
+    if (notificationRuntime?.available &&
+        ['stopped', 'stopping'].includes(String(notificationRuntime.state || '').toLowerCase())) {
+      record.lastNotification = readOwnerNotification(useCase.id) || previousRecord?.lastNotification || record.lastNotification || null;
+      return record;
+    }
   }
 
   // Never email an owner for a one-cycle transient probe failure. This guard
@@ -3431,18 +3437,17 @@ async function monitorApplicationLogsInternal(useCases, minutes = STATUS_LOG_WIN
           lastRecoveryCheckAt: new Date().toISOString(),
         };
 
-        // Stopped is lifecycle-authoritative. While ARM/probe reconciliation has
-        // the application in Stopped, telemetry is diagnostic only: never create
-        // a dependency latch that can later emit Active/Inactive notifications.
-        // Preserve the Stopped record and attach fresh telemetry for the UI/logs.
+        // A confirmed lifecycle Stop is authoritative. Telemetry remains visible
+        // for diagnostics but must not overwrite Stopped with Unavailable or create
+        // a dependency latch that later drives Active/Inactive email churn.
         if (current.status === 'stopped') {
-          const stoppedRecord = {
+          const stoppedDiagnosticRecord = {
             ...current,
             azureErrors: confirmedActionableErrors.slice(0, 25),
             telemetryObservedAt: new Date().toISOString(),
             lastRecoveryCheckAt: new Date().toISOString(),
           };
-          healthStore.set(useCase.id, stoppedRecord);
+          healthStore.set(useCase.id, stoppedDiagnosticRecord);
         } else {
           // Persist BEFORE publishing to healthStore so a simultaneous URL probe
           // cannot legitimately conclude "Healthy" from endpoint availability.
@@ -3474,9 +3479,8 @@ async function monitorApplicationLogsInternal(useCases, minutes = STATUS_LOG_WIN
           });
         }
 
-        // Notification dedupe is handled inside maybeNotifyOwner. Stopped has
-        // absolute lifecycle precedence, so telemetry cannot send Unavailable
-        // notifications until the application leaves Stopped.
+        // While Stopped, fresh dependency telemetry is diagnostic only and must
+        // not cause additional Unavailable alerts.
         if (current.status !== 'stopped') {
           await maybeNotifyOwner(useCase, record, current);
         }
